@@ -1,0 +1,2477 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 롱폼 영상 편집기 · 한 번에 완성 r5</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+
+<style>
+*{box-sizing:border-box}
+
+body{
+    margin:0;
+    background:#0f1115;
+    color:#fff;
+    font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",Arial,sans-serif;
+}
+
+.container{
+    width:min(1100px,96vw);
+    margin:24px auto;
+    background:#1b1f27;
+    border-radius:20px;
+    padding:24px;
+}
+
+h1{margin:0 0 6px;font-size:26px}
+h2{margin:22px 0 10px;font-size:19px}
+
+.subtitle-top{
+    color:#9aa4b2;
+    font-size:14px;
+    margin:0 0 18px;
+    line-height:1.6;
+}
+
+label{display:block;margin:12px 0 6px;font-weight:700}
+
+input,textarea,select{
+    width:100%;
+    padding:12px;
+    background:#111;
+    color:#fff;
+    border:1px solid #333;
+    border-radius:8px;
+    font-size:16px;
+    font-family:inherit;
+}
+
+textarea{height:300px;line-height:1.8;resize:vertical}
+
+button{
+    width:100%;
+    padding:14px;
+    margin-top:12px;
+    border:none;
+    border-radius:10px;
+    background:#00c853;
+    color:#fff;
+    font-size:17px;
+    cursor:pointer;
+    font-weight:700;
+    font-family:inherit;
+}
+
+button:hover{background:#00b248}
+button:disabled{opacity:.45;cursor:not-allowed}
+
+button.secondary{background:#37414f}
+button.secondary:hover{background:#45505f}
+
+#sentences{
+    margin-top:12px;
+    padding:14px;
+    background:#111;
+    border-radius:10px;
+    white-space:pre-wrap;
+    line-height:1.9;
+    font-size:16px;
+    max-height:340px;
+    overflow:auto;
+}
+
+#sentences .warn{color:#ffd400}
+
+#status{
+    margin-top:12px;
+    padding:14px;
+    background:#111;
+    border-radius:10px;
+    font-weight:700;
+}
+
+#progress{margin-top:8px;font-size:13px;color:#c7d0db;line-height:1.6}
+
+#notice{
+    margin-top:8px;
+    font-size:13px;
+    line-height:1.6;
+    color:#ffd400;
+    white-space:pre-wrap;
+}
+
+.hint{font-size:13px;color:#b9c1cc;line-height:1.55;margin-top:6px}
+
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+.manual-guide{
+    margin-top:10px;
+    padding:14px 16px;
+    background:#252b35;
+    border-radius:8px;
+    color:#dce3eb;
+    font-size:14px;
+    line-height:1.75;
+}
+
+.manual-guide strong{color:#fff}
+
+canvas,video{
+    width:100%;
+    margin-top:16px;
+    border-radius:10px;
+    background:#000;
+    display:block;
+    aspect-ratio:16/9;
+}
+
+#download{
+    display:none;
+    color:#4fc3f7;
+    font-size:18px;
+    margin-top:14px;
+}
+
+@media(max-width:700px){.row{grid-template-columns:1fr}}
+
+[hidden]{display:none!important}
+.container{width:min(1320px,96vw);padding:32px;background:#191e27;border:1px solid #293140}
+body{background:#0d1118;color:#edf2fa}
+h1{font-size:32px;letter-spacing:-1.2px;margin-top:14px}
+h2{color:#7ed9ba;font-size:16px;letter-spacing:.04em}
+h2 span{font-size:21px;color:#f3f7fd;letter-spacing:-.5px;margin-left:8px}
+.app-kicker{font-size:11px;letter-spacing:2px;color:#83e3c2;font-weight:800;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.app-kicker span{font-size:11px;letter-spacing:.5px;color:#9aaabd;padding:4px 9px;border:1px solid #364355;border-radius:6px}
+.subtitle-top{color:#adb9ca;margin-top:10px}
+.workflow{display:flex;flex-wrap:wrap;gap:14px;padding:15px 0 23px;border-bottom:1px solid #303949;margin-bottom:24px}
+.workflow span{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:#c6d0de}
+.workflow b{border-radius:50%;display:inline-grid;place-items:center;width:22px;height:22px;background:#293a38;color:#8fe9ca;font-size:11px}
+.font-settings{border:1px solid #364352;background:#151b24;border-radius:12px;padding:3px 16px 16px;margin-top:20px}
+.optional{font-size:11px;color:#96a7bb;font-weight:400;padding:2px 6px;background:#273446;border-radius:4px;margin-left:4px}
+.font-sample{margin-top:16px;font-size:26px;font-weight:900;color:#f4f8fd;min-height:52px;padding:14px 16px;border-radius:8px;background:#0e141e;line-height:1.45;overflow-wrap:anywhere}
+#fontStatus[data-state="warning"]{color:#ffca75}
+#fontStatus[data-state="ready"]{color:#94d4bf}
+input,textarea,select{background:#111722;border-color:#344052}
+input:focus,textarea:focus,select:focus,button:focus-visible,a:focus-visible{outline:2px solid #71e6bb;outline-offset:2px}
+input[type=file]{font-size:13px;padding:10px;min-height:48px}
+input[type=file]::file-selector-button{padding:5px 9px;margin-right:8px;background:#2b3a4c;border:0;border-radius:4px;color:#eef6ff;cursor:pointer}
+button{transition:background .15s,opacity .15s;background:#23b980;color:#071c16}
+button:hover{background:#44ce98}
+button.secondary{color:#e8f0fb;background:#2b3748}
+button.secondary:hover{background:#35465c}
+button:disabled{cursor:not-allowed}
+.button-detail{font-size:12px;opacity:.7;margin-left:7px;font-weight:500}
+.build-tag{display:inline-block;vertical-align:middle;margin-left:8px;font-size:12px;letter-spacing:0;padding:5px 9px;border-radius:6px;background:#2b4238;color:#96e9c4}
+.diagnostic-panel{margin-top:16px;border:1px solid #35465b;border-radius:10px;padding:14px;background:#101822}
+.diagnostic-panel summary{cursor:pointer;color:#a7c9e1;font-size:13px}
+.diagnostic-panel button{font-size:14px;padding:12px}
+#diagnosticText{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8;font-size:12px;color:#afc0d3;margin:15px 0 0;max-height:340px;overflow:auto}
+#diagnosticVideo{max-width:640px;margin:14px auto 0}
+#progress{white-space:pre-line}
+.cancel-button{width:auto;padding:9px 16px;font-size:13px;border:1px solid #a16855!important;background:#482f29!important}
+.rendering-section{margin-top:26px;padding:16px;background:#121822;border-radius:12px;border:1px solid #2a3546}
+.rendering-section summary{cursor:pointer;font-size:15px;font-weight:700;color:#d7e4f7}
+.rendering-section summary span{font-size:12px;font-weight:400;color:#92a6be;margin-left:8px}
+.rendering-section canvas{max-height:520px;object-fit:contain}
+.result-section{margin-top:26px;border-top:1px solid #303949;padding-top:8px}
+#video:not([src]){display:none}
+#download{background:#23b980;color:#072018;border-radius:8px;padding:14px 20px;text-decoration:none;font-size:16px;font-weight:800;align-items:center;justify-content:center}
+#resultState[data-state="dirty"]{color:#ffca75}
+.session-note{font-size:12px;color:#91a3bc;line-height:1.7;padding-top:22px;border-top:1px solid #303949;margin-top:32px}
+#status{background:#102c26;border:1px solid #255346;color:#bff6df;font-size:14px}
+@media(max-width:700px){.container{padding:17px;margin:10px auto}.font-sample{font-size:21px}.workflow{gap:12px}h1{font-size:25px}.font-settings{padding:0 10px 12px}.rendering-section summary span{display:block;margin-top:6px;margin-left:15px}}
+
+#overlayEditor{margin-top:30px;padding-top:28px;border-top:1px solid #37414f;color:#f2f5fa}
+#overlayEditor [hidden]{display:none!important}
+#overlayEditor .ov-heading{display:flex;align-items:center;justify-content:space-between;gap:16px}
+#overlayEditor .ov-eyebrow{font-size:12px;letter-spacing:.07em;color:#5cdda0;font-weight:700;margin-bottom:5px}
+#overlayEditor h2{margin:0;font-size:23px;line-height:1.45}
+#overlayEditor h3{font-size:14px;margin:0;font-weight:700}
+#overlayEditor .ov-badge{border:1px solid #445063;background:#242e3d;color:#c8d3e4;border-radius:30px;padding:7px 11px;font-size:12px;white-space:nowrap}
+#overlayEditor .ov-badge.ov-dirty{color:#ffd17c;background:#3d3020;border-color:#6b512a}
+#overlayEditor .ov-badge.ov-ready{color:#7beab4;background:#173c2d;border-color:#285d45}
+#overlayEditor .ov-intro{font-size:14px;color:#b4bfce;line-height:1.8;margin:10px 0 16px}
+#overlayEditor button{width:auto;margin:0;padding:11px 15px;font-size:14px;border-radius:8px;line-height:1.4;background:#128f59;color:#fff;border:1px solid transparent}
+#overlayEditor button:hover{background:#159d63}
+#overlayEditor button:disabled{opacity:.4;cursor:not-allowed}
+#overlayEditor button:focus-visible,#overlayEditor input:focus-visible,#overlayEditor select:focus-visible,#overlayEditor textarea:focus-visible,#overlayEditor canvas:focus-visible{outline:2px solid #67e8a6;outline-offset:3px}
+#overlayEditor button.ov-secondary{background:#2a3443;color:#e0e8f3;border-color:#3b485a}
+#overlayEditor button.ov-secondary:hover{background:#354255}
+#overlayEditor button.ov-danger{color:#ffb7b7;background:#482c34;border-color:#6f3b44}
+#overlayEditor button.ov-small{font-size:12px;padding:8px 10px}
+#overlayEditor .ov-toolbar{display:flex;align-items:center;gap:8px;margin-bottom:13px;flex-wrap:wrap}
+#overlayEditor .ov-toolbar-gap{flex:1}
+#overlayEditor .ov-layout{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:16px;align-items:start}
+#overlayEditor .ov-preview-column{min-width:0}
+#overlayEditor .ov-stage{position:relative;border:1px solid #3b485a;background:#0b0e13;border-radius:12px;overflow:hidden}
+#overlayEditor #ovCanvas{display:block;width:100%;aspect-ratio:16/9;height:auto;margin:0;border-radius:0;background:#0b0e13;touch-action:none;cursor:default}
+#overlayEditor .ov-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:30px;pointer-events:none;background:linear-gradient(140deg,#192332dd,#0f151fdd);gap:9px}
+#overlayEditor .ov-empty strong{font-size:18px;font-weight:700}
+#overlayEditor .ov-empty span{font-size:13px;line-height:1.8;max-width:300px;color:#9daabc}
+#overlayEditor .ov-player{display:flex;align-items:center;gap:9px;margin-top:11px;flex-wrap:wrap}
+#overlayEditor .ov-player button{padding:9px 11px;font-size:12px}
+#overlayEditor #ovSeek{flex:1;min-width:90px;accent-color:#31cb82;padding:0;height:22px}
+#overlayEditor #ovTime{font-size:12px;color:#c2cddd;font-variant-numeric:tabular-nums;white-space:nowrap}
+#overlayEditor .ov-help{font-size:12px;color:#94a3b8;line-height:1.75;margin:10px 0}
+#overlayEditor .ov-compact{margin-top:6px}
+#overlayEditor .ov-layers-heading{display:flex;justify-content:space-between;align-items:center;margin:22px 0 9px}
+#overlayEditor #ovCount{font-size:12px;color:#98a6b9}
+#overlayEditor .ov-layer-list{background:#121923;border:1px solid #303d4e;border-radius:10px;padding:6px;max-height:260px;overflow-y:auto;min-height:66px}
+#overlayEditor .ov-no-layers{margin:15px 8px;font-size:12px;text-align:center;color:#8f9db1}
+#overlayEditor .ov-subtitle-track{display:flex;align-items:center;gap:9px;margin:7px 10px;color:#adbacb;font-size:12px}
+#overlayEditor .ov-subtitle-track::after{content:"";flex:1;border-top:1px solid #39495d}
+#overlayEditor .ov-menu{position:fixed;z-index:20;min-width:158px;padding:5px;border:1px solid #4c5d73;border-radius:9px;background:#202a38;box-shadow:0 6px 22px #0006}
+#overlayEditor .ov-menu button{display:block;width:100%;background:transparent;text-align:left;padding:9px 12px}
+#overlayEditor .ov-menu button:hover:enabled,#overlayEditor .ov-menu button:focus-visible{background:#324457}
+#overlayEditor .ov-layer-item{width:100%;display:flex;align-items:center;gap:10px;border:1px solid transparent;text-align:left;background:transparent;padding:10px;border-radius:7px;margin:2px 0}
+#overlayEditor .ov-layer-item:hover{background:#243044}
+#overlayEditor .ov-layer-item.ov-selected{background:#203e33;border-color:#388a61}
+#overlayEditor .ov-layer-icon{display:flex;align-items:center;justify-content:center;width:33px;height:33px;border-radius:6px;background:#303c4e;font-size:11px;font-weight:700;color:#c7e0ed;flex-shrink:0}
+#overlayEditor .ov-layer-name{display:block;font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+#overlayEditor .ov-layer-detail{display:block;color:#97a7bd;font-size:11px;margin-top:3px;font-weight:400;font-variant-numeric:tabular-nums}
+#overlayEditor .ov-layer-body{min-width:0;flex:1}
+#overlayEditor .ov-properties{background:#151c27;border:1px solid #303d4e;border-radius:12px;padding:16px}
+#overlayEditor .ov-properties-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+#overlayEditor #ovType{font-size:11px;color:#a7b8cb;background:#263346;padding:4px 7px;border-radius:5px}
+#overlayEditor fieldset{border:0;margin:0;padding:0;min-width:0}
+#overlayEditor label{font-size:12px;line-height:1.5;margin:12px 0 6px;color:#b8c6d9;font-weight:500}
+#overlayEditor input:not([type=range]):not([type=checkbox]),#overlayEditor select,#overlayEditor textarea{width:100%;padding:9px 10px;background:#0e1520;color:#eaf0fa;border:1px solid #344256;border-radius:6px;font-size:13px;line-height:1.5;margin:0;font-family:inherit}
+#overlayEditor input[type=number]{font-variant-numeric:tabular-nums}
+#overlayEditor textarea{height:87px;resize:vertical;min-height:63px;max-height:180px}
+#overlayEditor input[type=color]{height:39px;padding:4px!important;cursor:pointer}
+#overlayEditor input[type=range]{width:100%;accent-color:#31cb82;padding:0}
+#overlayEditor .ov-fields-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:9px}
+#overlayEditor .ov-action-row{display:flex;gap:7px;margin-top:9px}
+#overlayEditor .ov-action-row button{flex:1}
+#overlayEditor .ov-checks{display:flex;gap:13px;flex-wrap:wrap}
+#overlayEditor .ov-checks label{display:flex;align-items:center;gap:5px;margin-top:9px}
+#overlayEditor .ov-checks input{width:auto;accent-color:#31cb82}
+#overlayEditor .ov-section-label{border-top:1px solid #303d4e;padding-top:15px;margin-top:16px;font-size:12px;font-weight:700;color:#d4dfef}
+#overlayEditor #ovOpacityValue{float:right;font-variant-numeric:tabular-nums;color:#d7e4f4}
+#overlayEditor #ovGoStart{width:100%;margin-top:8px;color:#ffe0a2}
+#overlayEditor .ov-message{min-height:22px;color:#b2c6df;font-size:13px;line-height:1.7;margin:14px 0}
+#overlayEditor .ov-message.ov-error{color:#ffb5ae}
+#overlayEditor .ov-export-row{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:17px 19px;background:#1d332b;border:1px solid #315744;border-radius:11px}
+#overlayEditor .ov-export-row strong{font-size:14px;color:#e6f9ef}
+#overlayEditor .ov-export-row p{font-size:12px;color:#a3bcaf;line-height:1.8;margin:5px 0 0}
+#overlayEditor #ovExport{background:#16945e;white-space:nowrap;flex-shrink:0;padding:12px 17px}
+#overlayEditor .ov-sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:900px){#overlayEditor .ov-layout{grid-template-columns:minmax(0,1fr) 245px}#overlayEditor .ov-properties{padding:12px}#overlayEditor #ovTime{width:100%;text-align:right}}
+@media(max-width:700px){#overlayEditor .ov-layout{grid-template-columns:1fr}#overlayEditor .ov-properties{padding:16px}#overlayEditor .ov-export-row{align-items:stretch;flex-direction:column;gap:12px}#overlayEditor .ov-heading{align-items:flex-start}#overlayEditor .ov-badge{font-size:10px;padding:6px 8px}#overlayEditor h2{font-size:20px}#overlayEditor .ov-toolbar-gap{display:none}#overlayEditor .ov-toolbar button{flex:1;white-space:nowrap}#overlayEditor #ovTime{width:auto}#overlayEditor .ov-empty strong{font-size:16px}}
+
+</style>
+</head>
+
+<body>
+<noscript><p style="padding:24px;color:white;background:#6b3030">JavaScript가 꺼져 있어 영상을 만들 수 없습니다. HTML 파일을 내려받아 Chrome 또는 Edge에서 직접 열어주세요.</p></noscript>
+<div class="container">
+
+<div class="app-kicker">LONGFORM STUDIO <span>16:9 · 1920 × 1080</span></div>
+<h1>AI 롱폼 영상 편집기 <small class="build-tag">한 번에 완성 r5</small></h1>
+<p class="subtitle-top">음성과 자막을 준비하고, 미리보기에서 편집한 뒤 최종 영상을 한 번에 완성하세요.</p>
+<nav class="workflow" aria-label="작업 순서"><span><b>1</b> 설정 &amp; 대본</span><span><b>2</b> 음성 · 자막 준비</span><span><b>3</b> 미리보기에서 편집</span><span><b>4</b> 최종 영상 만들기</span></nav>
+
+<h2>01 <span>영상 설정</span></h2>
+
+<label for="apiKey">ElevenLabs API Key</label>
+<input id="apiKey" type="password" placeholder="sk_...">
+
+<label for="voiceId">Voice ID</label>
+<input id="voiceId" placeholder="예: JBFqnCBsd6RMkjVDRZzb">
+
+<div class="row">
+    <div>
+        <label for="speechSpeed">말하기 속도</label>
+        <select id="speechSpeed">
+            <option value="0.8">0.8x</option>
+            <option value="0.9">0.9x</option>
+            <option value="1" selected>1.0x</option>
+            <option value="1.1">1.1x</option>
+            <option value="1.2">1.2x</option>
+        </select>
+    </div>
+    <div>
+        <label for="imageInput">배경 이미지</label>
+        <input id="imageInput" type="file" accept="image/*">
+    </div>
+</div>
+
+<div class="hint">이미지는 자동으로 1920×1080에 맞춰 최적화됩니다.</div>
+
+<div class="font-settings">
+    <div class="row">
+        <div><label for="subtitleFont">자막 글꼴</label><select id="subtitleFont"></select></div>
+        <div><label for="fontFile">내 글꼴 첨부 <span class="optional">선택</span></label><input id="fontFile" type="file" accept=".ttf,.otf,.woff,.woff2" multiple></div>
+    </div>
+    <div id="fontSample" class="font-sample" aria-label="글꼴 미리보기">원하는 글꼴로 자막을 만들어 보세요</div>
+    <div id="fontStatus" class="hint" aria-live="polite">웹 글꼴은 인터넷 연결이 필요합니다. TTF·OTF·WOFF·WOFF2 파일을 첨부하면 내 글꼴도 사용할 수 있습니다.</div>
+    <div class="hint">추가 텍스트의 글꼴은 편집 화면에서 각각 선택할 수 있습니다. 첨부한 글꼴은 이 페이지를 열어 둔 동안 유지됩니다.</div>
+</div>
+<button id="saveButton" class="secondary">설정 저장</button>
+
+<hr style="margin:25px 0;border-color:#333">
+
+<h2>02 <span>대본과 자막</span></h2>
+
+<div class="manual-guide">
+<strong>자막은 항상 한 줄로 표시됩니다.</strong><br>
+Enter로 나눈 한 줄이 자막 카드 하나가 됩니다.<br>
+문장이 길면 글자 크기가 자동으로 줄어들며 한 줄을 유지합니다.<br>
+<strong>글자가 너무 작아지는 줄은 아래 검사 결과에서 노란색으로 알려드립니다.</strong>
+</div>
+
+<textarea id="script" placeholder="예시:
+
+여러분
+이 증상이 있다면
+
+절대 그냥
+넘기시면 안 됩니다.
+
+특히 60대 이후에는
+더욱 주의하셔야 합니다."></textarea>
+
+<button id="applyButton" class="secondary">자막 검사 및 적용</button>
+
+<div id="sentences"></div>
+
+<button id="generateButton">음성·자막 준비하기 <span class="button-detail">편집 미리보기 열기</span></button>
+<div class="hint">음성과 자막을 먼저 준비하고, 최종 영상은 편집을 마친 뒤 한 번만 만듭니다.</div>
+<div class="hint">대본·음성·말하기 속도·배경 이미지를 바꾸면 새로 준비해주세요. 새로 준비하면 현재 이미지·텍스트 편집 내용은 초기화됩니다.</div>
+
+<div id="status" role="status">대기 중 · 설정과 대본을 입력해주세요.</div>
+<div id="progress"></div>
+<div id="notice"></div>
+<button id="cancelButton" class="secondary cancel-button" hidden>현재 작업 취소</button>
+<button id="audioStartButton" hidden>오디오 시작하고 계속</button>
+<button id="fallbackExportButton" hidden>최종 영상 만들기 (기본 자막)</button>
+<details id="diagnosticPanel" class="diagnostic-panel">
+  <summary>생성 문제 확인 · API 없이 녹화 점검</summary>
+  <p class="hint">먼저 3초짜리 테스트 영상으로 브라우저의 녹화 기능을 확인할 수 있습니다. API Key나 대본이 필요하지 않습니다.</p>
+  <button id="generationCheckButton" class="secondary">영상 생성 점검 (API 사용 없음)</button>
+  <video id="diagnosticVideo" controls playsinline hidden></video>
+  <pre id="diagnosticText">프로그램을 준비하고 있습니다.</pre>
+</details>
+
+<details id="renderingSection" class="rendering-section">
+<summary>최종 영상 생성 화면 <span>최종 출력 중 실시간 확인</span></summary>
+<canvas id="canvas" width="1920" height="1080"></canvas>
+<div class="hint">영상 저장 중에는 이 탭을 화면에 열어 두세요. 녹화는 영상 길이만큼 진행됩니다.</div>
+</details>
+
+<section id="overlayEditor" aria-labelledby="ovTitle">
+  <div class="ov-heading">
+    <div><div class="ov-eyebrow">미리보기에서 편집</div><h2 id="ovTitle">이미지 · 텍스트 편집</h2></div>
+    <span id="ovBadge" class="ov-badge">음성·자막 준비 전</span>
+  </div>
+  <p id="ovPasteHint" class="ov-intro" role="status">사진을 복사한 뒤 ‘이미지 붙여넣기’를 누르거나, 미리보기를 클릭하고 Ctrl+V를 누르세요. Mac에서는 ⌘V를 사용하세요.</p>
+  <div class="ov-toolbar">
+    <button type="button" id="ovAddImage" disabled>＋ 이미지 첨부</button>
+    <button type="button" id="ovPasteImage">이미지 붙여넣기</button>
+    <input type="file" id="ovImageInput" accept="image/png,image/jpeg,image/webp,image/avif" multiple hidden>
+    <button type="button" id="ovAddText" class="ov-secondary" disabled>＋ 텍스트 추가</button>
+    <span class="ov-toolbar-gap"></span>
+    <button type="button" id="ovUndo" class="ov-small ov-secondary" aria-label="편집 실행 취소" disabled>↶ 실행 취소</button>
+    <button type="button" id="ovRedo" class="ov-small ov-secondary" aria-label="편집 다시 실행" disabled>↷ 다시 실행</button>
+  </div>
+  <div class="ov-layout">
+    <div class="ov-preview-column">
+      <div class="ov-stage">
+        <canvas id="ovCanvas" width="1920" height="1080" tabindex="0" aria-label="편집 미리보기. 이미지를 붙여넣거나 드래그해 이동하세요. 가장자리와 모서리로 크기를 조절하고 우클릭으로 순서를 바꿀 수 있습니다."></canvas>
+        <div id="ovEmpty" class="ov-empty"><strong>복사한 사진을 여기에 붙여넣으세요</strong><span>이 화면을 클릭하고 Ctrl+V를 누르세요. 음성·자막을 준비하기 전에도 사진을 배치할 수 있습니다.</span></div>
+      </div>
+      <div class="ov-player">
+        <button type="button" id="ovPlay" class="ov-secondary" aria-label="편집 영상 미리보기 재생" disabled>▶ 재생</button>
+        <button type="button" id="ovBack" class="ov-secondary ov-small" aria-label="5초 뒤로 이동" disabled>−5초</button>
+        <input id="ovSeek" type="range" min="0" max="1" step="0.01" value="0" aria-label="편집 영상 재생 위치" disabled>
+        <output id="ovTime">00:00.0 / 00:00.0</output>
+      </div>
+      <p class="ov-help">이미지 가장자리를 끌면 한쪽 길이만 바뀝니다. 모서리를 끌면 너비와 높이를 함께 조절하고, Shift를 누르면 현재 비율을 유지합니다.<br>이미지나 아래 목록을 우클릭해 순서를 바꾸세요. 목록 위쪽에 있는 요소가 화면 앞쪽에 표시됩니다.</p>
+      <div class="ov-layers-heading"><h3>추가한 이미지와 텍스트</h3><span id="ovCount">0개</span></div>
+      <div id="ovLayerList" class="ov-layer-list" aria-label="추가한 요소 목록"><p class="ov-no-layers">아직 추가한 요소가 없습니다.</p></div>
+    </div>
+    <aside class="ov-properties" aria-label="선택한 요소 설정">
+      <div class="ov-properties-title"><h3>선택한 요소</h3><span id="ovType">선택 없음</span></div>
+      <p id="ovSelectHint" class="ov-help">이미지나 텍스트를 추가하거나, 화면에서 편집할 요소를 클릭하세요.</p>
+      <fieldset id="ovFields" disabled hidden>
+        <legend class="ov-sr-only">선택한 요소 편집</legend>
+        <div id="ovTextFields" hidden>
+          <label for="ovText">텍스트 내용</label>
+          <textarea id="ovText" rows="3" maxlength="1200" placeholder="원하는 문구를 입력하세요"></textarea>
+          <label for="ovFont">글꼴</label>
+          <select id="ovFont"></select>
+          <div class="ov-fields-row">
+            <div><label for="ovFontSize">글자 크기</label><input id="ovFontSize" type="number" min="12" max="240" step="1" value="76"></div>
+            <div><label for="ovColor">글자 색상</label><input id="ovColor" type="color" value="#ffffff"></div>
+          </div>
+          <div class="ov-checks"><label><input id="ovOutline" type="checkbox" checked>검은 테두리</label><label><input id="ovBackground" type="checkbox">배경 상자</label></div>
+        </div>
+        <div class="ov-fields-row">
+          <div><label for="ovX">가로 위치 (px)</label><input id="ovX" type="number" min="0" max="1920" step="1"></div>
+          <div><label for="ovY">세로 위치 (px)</label><input id="ovY" type="number" min="0" max="1080" step="1"></div>
+        </div>
+        <div class="ov-fields-row">
+          <div><label for="ovWidth">너비 (px)</label><input id="ovWidth" type="number" min="1" max="1920" step="1"></div>
+          <div><label for="ovHeight">높이 (px)</label><input id="ovHeight" type="number" min="1" max="1080" step="1"></div>
+        </div>
+        <p class="ov-help ov-compact" id="ovSizeHint">영상 크기 1920×1080 px</p>
+        <label for="ovOpacity">불투명도 <span id="ovOpacityValue">100%</span></label>
+        <input id="ovOpacity" type="range" min="5" max="100" step="1" value="100">
+        <div class="ov-section-label">표시 시간</div>
+        <div class="ov-fields-row">
+          <div><label for="ovStart">시작 (초)</label><input id="ovStart" type="number" min="0" step="0.1"></div>
+          <div><label for="ovEnd">종료 (초)</label><input id="ovEnd" type="number" min="0.01" step="0.1"></div>
+        </div>
+        <div class="ov-action-row"><button type="button" id="ovWhole" class="ov-small ov-secondary">영상 전체</button><button type="button" id="ovHere" class="ov-small ov-secondary">현재부터 끝까지</button></div>
+        <button type="button" id="ovGoStart" class="ov-small ov-secondary" hidden>이 요소가 보이는 시간으로 이동</button>
+        <div class="ov-section-label">요소 관리</div>
+        <div class="ov-action-row"><button type="button" id="ovForward" class="ov-small ov-secondary">앞으로</button><button type="button" id="ovBackward" class="ov-small ov-secondary">뒤로</button></div>
+        <div class="ov-action-row"><button type="button" id="ovDuplicate" class="ov-small ov-secondary">복제</button><button type="button" id="ovDelete" class="ov-small ov-danger">삭제</button></div>
+      </fieldset>
+    </aside>
+  </div>
+  <div id="ovMenu" class="ov-menu" role="group" aria-label="겹침 순서" hidden>
+    <button type="button" id="ovToFront">맨 앞으로 가져오기</button>
+    <button type="button" id="ovToBack">맨 뒤로 보내기</button>
+  </div>
+  <p id="ovMessage" class="ov-message" role="status" aria-live="polite">먼저 붙여넣은 이미지는 음성·자막 준비 후 영상 전체에 표시됩니다. 표시 구간은 그때 조절하세요.</p>
+  <div class="ov-export-row"><div><strong>편집을 마쳤나요?</strong><p>준비한 음성·자막과 이미지·텍스트를 합쳐 최종 영상 파일을 만듭니다. 완성되면 아래에서 다운로드하세요.</p></div><button type="button" id="ovExport" disabled>최종 영상 만들기</button></div>
+  <p class="ov-help">편집 내용은 이 페이지를 열어 둔 동안 유지됩니다. 페이지를 닫거나 새로고침하기 전에 최종 영상을 다운로드해 주세요.</p>
+</section>
+
+
+<section class="result-section" aria-labelledby="resultHeading">
+<h2 id="resultHeading">04 <span>결과 영상</span></h2>
+<p id="resultState" class="hint">미리보기에서 편집을 마친 뒤 ‘최종 영상 만들기’를 누르면 이곳에서 재생하고 다운로드할 수 있습니다.</p>
+<video id="video" controls playsinline preload="metadata"></video>
+<a id="download" download="longform_16x9_final.webm">최종 영상 다운로드</a>
+</section>
+<p class="session-note">작업 중에는 이 페이지를 닫거나 새로고침하지 마세요. 생성한 음성과 편집 내용은 현재 페이지에 보관됩니다.</p>
+
+</div>
+
+<script>
+/* This guard is independent of the main script, so startup errors are visible. */
+(function(){
+    function showFailure(message){
+        var key=document.getElementById("apiKey");
+        message=String(message || "알 수 없는 실행 오류");
+        if(key && key.value)message=message.split(key.value).join("[API Key 숨김]");
+        var status=document.getElementById("status"),progress=document.getElementById("progress"),diagnostic=document.getElementById("diagnosticText");
+        if(status)status.textContent="프로그램 실행 오류가 발생했습니다.";
+        if(progress)progress.textContent=message;
+        if(diagnostic)diagnostic.textContent="한 번에 완성 r5 · 초기화/실행 오류\n"+message;
+        var panel=document.getElementById("diagnosticPanel");if(panel)panel.open=true;
+    }
+    window.addEventListener("error",function(event){if(event.message)showFailure(event.message);});
+    window.addEventListener("unhandledrejection",function(event){showFailure(event.reason && event.reason.message || event.reason);});
+})();
+</script>
+<script>
+"use strict";
+
+/* =========================================================
+   0. DOM 참조
+========================================================= */
+const apiInput       = document.getElementById("apiKey");
+const voiceInput     = document.getElementById("voiceId");
+const speedInput     = document.getElementById("speechSpeed");
+const imageInput     = document.getElementById("imageInput");
+const scriptInput    = document.getElementById("script");
+const sentencesBox   = document.getElementById("sentences");
+const statusBox      = document.getElementById("status");
+const progressBox    = document.getElementById("progress");
+const noticeBox      = document.getElementById("notice");
+const video          = document.getElementById("video");
+const downloadLink   = document.getElementById("download");
+const canvas         = document.getElementById("canvas");
+const ctx            = canvas.getContext("2d", { alpha: false });
+const saveButton     = document.getElementById("saveButton");
+const applyButton    = document.getElementById("applyButton");
+const generateButton = document.getElementById("generateButton");
+
+/* =========================================================
+   1. 저장소
+========================================================= */
+const memoryStorage = {};
+
+function safeGet(key){
+    try{
+        const v = localStorage.getItem(key);
+        if(v !== null) return v;
+    }catch(e){}
+    return memoryStorage[key] || null;
+}
+
+function safeSet(key, value){
+    memoryStorage[key] = String(value);
+    try{ localStorage.setItem(key, String(value)); }catch(e){}
+}
+
+let currentImageData = safeGet("doctor_image") || "";
+apiInput.value   = safeGet("eleven_api") || "";
+voiceInput.value = safeGet("voice_id") || "";
+speedInput.value = safeGet("eleven_speed") || "1";
+
+/* =========================================================
+   2. 공통 유틸
+========================================================= */
+function setStatus(text, progress = "", notice = ""){
+    statusBox.textContent   = text;
+    progressBox.textContent = progress;
+    noticeBox.textContent   = notice;
+}
+
+function sleep(ms){
+    return new Promise(r => setTimeout(r, ms));
+}
+
+function clamp(v, min, max){
+    return Math.min(max, Math.max(min, v));
+}
+
+function isNum(v){
+    return Number.isFinite(Number(v));
+}
+
+function formatTime(sec){
+    sec = Math.max(0, Number(sec) || 0);
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return `${m}:${String(s).padStart(2, "0")}`;
+}
+
+/* =========================================================
+   3. 대본 → 줄 목록
+========================================================= */
+function getManualLines(){
+    return scriptInput.value
+        .replace(/\r\n/g, "\n")
+        .replace(/\r/g, "\n")
+        .split("\n")
+        .map(l => l.trim())
+        .filter(l => l.length > 0);
+}
+
+/* =========================================================
+   4. 이미지 처리
+========================================================= */
+function fileToDataURL(file){
+    return new Promise((resolve, reject) => {
+        const r = new FileReader();
+        r.onload  = () => resolve(r.result);
+        r.onerror = () => reject(new Error("이미지를 읽지 못했습니다."));
+        r.readAsDataURL(file);
+    });
+}
+
+function loadImage(src){
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload  = () => resolve(img);
+        img.onerror = () => reject(new Error("이미지를 불러오지 못했습니다."));
+        img.src = src;
+    });
+}
+
+function drawCover(c, img, W, H){
+    const scale = Math.max(W / img.width, H / img.height);
+    const w = img.width * scale;
+    const h = img.height * scale;
+    c.drawImage(img, (W - w) / 2, (H - h) / 2, w, h);
+}
+
+async function optimizeImage(file){
+    const img = await loadImage(await fileToDataURL(file));
+    const c = document.createElement("canvas");
+    c.width = 1920;
+    c.height = 1080;
+    const cc = c.getContext("2d", { alpha: false });
+    cc.fillStyle = "#000";
+    cc.fillRect(0, 0, 1920, 1080);
+    drawCover(cc, img, 1920, 1080);
+    return c.toDataURL("image/jpeg", 0.9);
+}
+
+/* =========================================================
+   5. 설정 저장
+========================================================= */
+async function saveSettings(){
+    const api   = apiInput.value.trim();
+    const voice = voiceInput.value.trim();
+
+    if(!api || !voice){
+        setStatus("설정을 저장하지 못했습니다.", "API Key와 Voice ID를 모두 입력해주세요.");
+        return;
+    }
+
+    safeSet("eleven_api", api);
+    safeSet("voice_id", voice);
+    safeSet("eleven_speed", speedInput.value);
+
+    if(imageInput.files[0]){
+        setStatus("이미지를 저장하는 중입니다...");
+        try{
+            currentImageData = await optimizeImage(imageInput.files[0]);
+            safeSet("doctor_image", currentImageData);
+        }catch(e){
+            setStatus("이미지 저장 실패", e.message);
+            return;
+        }
+    }
+
+    setStatus("설정을 저장했습니다.", currentImageData ? "이미지 포함" : "이미지가 아직 없습니다.");
+}
+
+/* =========================================================
+   6. 자막 스타일 상수
+========================================================= */
+// 자막 글꼴은 아래 글꼴 관리자의 선택값을 사용합니다.
+const SUB_BASE_SIZE      = 116;   // 기본(최대) 글자 크기
+const SUB_MAX_WIDTH      = 1640;  // 한 줄이 넘을 수 없는 폭
+const SUB_CENTER_Y       = 805;   // 자막 세로 중심
+const SUB_READABLE_SIZE  = 62;    // 이 아래로 작아지면 "너무 긴 줄" 경고
+
+const RED_KEYWORDS = ["위험","주의","경고","심각","치명적","혈관","혈전","막힘","뇌졸중","심근경색","당뇨","암","염증","통증","출혈"];
+const GREEN_KEYWORDS = ["건강","예방","관리","운동","식습관","영양","꾸준히","도움","회복","유지"];
+const YELLOW_KEYWORDS = ["가장","핵심","중요","반드시","절대","10%","20%","30%","50%","100%"];
+
+function containsAny(text, list){
+    return list.some(v => text.includes(v));
+}
+
+function getLineColor(text){
+    if(containsAny(text, RED_KEYWORDS)) return "#ff3030";
+    if(containsAny(text, YELLOW_KEYWORDS) || /\d+(?:\.\d+)?\s*(?:%|배|개월|년)/.test(text)) return "#ffd400";
+    if(containsAny(text, GREEN_KEYWORDS)) return "#42e95f";
+    return "#ffffff";
+}
+
+/* =========================================================
+   7. 자막 레이아웃 (캐시 사용)
+========================================================= */
+const layoutCache = new Map();
+
+function setSubtitleFont(c, size){
+    c.font = `900 ${size}px ${resolveFont(selectedSubtitleFontId)}`;
+}
+
+function measureAt(c, text, size){
+    setSubtitleFont(c, size);
+    return c.measureText(text).width;
+}
+
+function normalizeSubtitleText(text){
+    return String(text || "").replace(/\s+/g, " ").trim();
+}
+
+function getSubtitleLayout(c, rawText){
+    const text = normalizeSubtitleText(rawText);
+    if(!text) return null;
+
+    const cacheKey = selectedSubtitleFontId + "|" + resolveFont(selectedSubtitleFontId) + "|" + text;
+    const cached = layoutCache.get(cacheKey);
+    if(cached) return cached;
+
+    const refWidth = Math.max(1, measureAt(c, text, 100));
+    let size = clamp(Math.floor(100 * SUB_MAX_WIDTH / refWidth), 12, SUB_BASE_SIZE);
+
+    let guard = 0;
+    while(size > 12 && measureAt(c, text, size) > SUB_MAX_WIDTH && guard++ < 12){
+        size -= 1;
+    }
+
+    const layout = {
+        text,
+        fontSize: size,
+        width: measureAt(c, text, size),
+        color: getLineColor(text)
+    };
+
+    layoutCache.set(cacheKey, layout);
+    return layout;
+}
+
+/* =========================================================
+   8. 자막 그리기
+========================================================= */
+function drawSubtitle(c, layout){
+    setSubtitleFont(c, layout.fontSize);
+    c.textAlign = "center";
+    c.textBaseline = "middle";
+    c.lineJoin = "round";
+    c.lineCap = "round";
+
+    c.shadowColor = "rgba(0,0,0,.95)";
+    c.shadowBlur = 4;
+    c.shadowOffsetX = 2;
+    c.shadowOffsetY = 3;
+
+    c.strokeStyle = "#000";
+    c.lineWidth = Math.max(12, Math.round(layout.fontSize * 0.13));
+    c.strokeText(layout.text, 960, SUB_CENTER_Y);
+
+    c.fillStyle = layout.color;
+    c.fillText(layout.text, 960, SUB_CENTER_Y);
+
+    c.shadowBlur = 0;
+    c.shadowOffsetX = 0;
+    c.shadowOffsetY = 0;
+}
+
+/* =========================================================
+   9. 배경 프레임 캐시
+========================================================= */
+let backgroundCanvas = null;
+
+function buildBackground(img){
+    const c = document.createElement("canvas");
+    c.width = 1920;
+    c.height = 1080;
+    const cc = c.getContext("2d", { alpha: false });
+
+    cc.fillStyle = "#000";
+    cc.fillRect(0, 0, 1920, 1080);
+    drawCover(cc, img, 1920, 1080);
+
+    cc.font = "16px Arial,'Noto Sans KR','Malgun Gothic'";
+    cc.textAlign = "right";
+    cc.textBaseline = "alphabetic";
+    cc.fillStyle = "rgba(255,255,255,.82)";
+    cc.shadowColor = "rgba(0,0,0,.95)";
+    cc.shadowBlur = 4;
+    cc.shadowOffsetX = 1;
+    cc.shadowOffsetY = 1;
+    cc.fillText("AI 제작 콘텐츠이며 논문을 근거로 전달하는 건강정보입니다.", 1880, 28);
+    cc.fillText("개인에 따라 효과는 다를 수 있으며, 특정한 결과를 보장할 수 없습니다.", 1880, 49);
+    cc.shadowBlur = 0;
+
+    backgroundCanvas = c;
+}
+
+function drawFrame(subtitleLayout){
+    if(backgroundCanvas){
+        ctx.drawImage(backgroundCanvas, 0, 0);
+    }else{
+        ctx.fillStyle = "#000";
+        ctx.fillRect(0, 0, 1920, 1080);
+    }
+    if(subtitleLayout) drawSubtitle(ctx, subtitleLayout);
+}
+
+/* =========================================================
+   10. 자막 검사 및 적용
+========================================================= */
+async function applyManualSubtitles(){
+    const lines = getManualLines();
+
+    if(!lines.length){
+        sentencesBox.textContent = "";
+        setStatus("대본이 비어 있습니다.", "한 줄에 자막 하나씩 입력해주세요.");
+        return;
+    }
+
+    await ensureFontReady();
+
+    sentencesBox.innerHTML = "";
+    let tooLong = 0;
+
+    lines.forEach((line, i) => {
+        const layout = getSubtitleLayout(ctx, line);
+        const div = document.createElement("div");
+        const small = layout.fontSize < SUB_READABLE_SIZE;
+        if(small) tooLong++;
+        div.className = small ? "warn" : "";
+        div.textContent = `${String(i + 1).padStart(3, " ")}. ${line}` + (small ? `  ← 글자 ${layout.fontSize}px, 나누는 것을 권장합니다` : "");
+        sentencesBox.appendChild(div);
+    });
+
+    setStatus(
+        `자막 ${lines.length}줄을 적용했습니다.`,
+        "입력한 줄바꿈 그대로 사용됩니다.",
+        tooLong ? `너무 긴 줄 ${tooLong}개가 있습니다. 노란색 줄을 짧게 나누면 시니어 가독성이 좋아집니다.` : ""
+    );
+}
+
+/* =========================================================
+   11. 배치 나누기
+========================================================= */
+function buildBatches(lines, maxChars = 350, maxLines = 7){
+    const batches = [];
+    let current = [];
+    let len = 0;
+
+    for(const line of lines){
+        const lineLength = Array.from(line).length;
+        const add = (current.length ? 1 : 0) + lineLength;
+
+        if(current.length && (len + add > maxChars || current.length >= maxLines)){
+            batches.push(current);
+            current = [];
+            len = 0;
+        }
+
+        current.push(line);
+        len += add;
+    }
+
+    if(current.length) batches.push(current);
+    return batches;
+}
+
+function buildTextAndRanges(lines){
+    let text = "";
+    const ranges = [];
+
+    lines.forEach((line, index) => {
+        if(index > 0) text += " ";
+        const start = Array.from(text).length;
+        text += line;
+        const end = Array.from(text).length;
+        ranges.push({ text: line, startIndex: start, endIndex: end });
+    });
+
+    return { text, ranges };
+}
+
+/* =========================================================
+   12. ElevenLabs 요청
+========================================================= */
+/* Keep the existing ElevenLabs request format, but bound every network wait. */
+async function requestTtsBatch(api,voice,lines,speed,signal,onProgress){
+    const data=buildTextAndRanges(lines);
+    const url=`https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(voice)}/with-timestamps?output_format=mp3_44100_128`;
+    const requestController=new AbortController();
+    const started=performance.now();
+    let timedOut=false;
+    const abortRequest=()=>requestController.abort();
+    if(signal?.aborted) throw new DOMException("작업을 취소했습니다.","AbortError");
+    signal?.addEventListener("abort",abortRequest,{once:true});
+    const timeout=setTimeout(()=>{timedOut=true;requestController.abort();},90000);
+    const progressTimer=onProgress ? setInterval(()=>onProgress(Math.floor((performance.now()-started)/1000)),1000) : null;
+    try{
+        const response=await fetch(url,{
+            method:"POST",
+            signal:requestController.signal,
+            headers:{"Accept":"application/json","Content-Type":"application/json","xi-api-key":api},
+            body:JSON.stringify({text:data.text,model_id:"eleven_multilingual_v2",voice_settings:{speed:clamp(Number(speed)||1,0.7,1.2)}})
+        });
+        if(!response.ok){
+            let detail="",code="";
+            try{
+                const body=await response.json();
+                detail=body?.detail?.message || (typeof body?.detail==="string" ? body.detail : "");
+                code=body?.detail?.status || "";
+            }catch(error){if(requestController.signal.aborted) throw error;}
+            const reasons={401:"API Key 또는 계정 사용 권한을 확인해주세요.",403:"선택한 음성을 사용할 권한이 있는지 확인해주세요.",404:"Voice ID가 올바른지 확인해주세요.",422:"음성 설정이나 입력 대본을 확인해주세요.",429:"요청 한도 또는 크레딧 상태를 확인해주세요."};
+            let reason=reasons[response.status] || "음성 서비스가 요청을 처리하지 못했습니다.";
+            if(code==="quota_exceeded") reason="ElevenLabs의 남은 크레딧이 부족합니다.";
+            throw new Error(`음성 요청 실패 (HTTP ${response.status}). ${reason}${detail ? "\n서버 메시지: "+detail : ""}`);
+        }
+        const result=await response.json();
+        if(!result?.audio_base64) throw new Error("음성 서버 응답에 오디오 데이터가 없습니다.");
+        return result;
+    }catch(error){
+        if(signal?.aborted) throw new DOMException("작업을 취소했습니다.","AbortError");
+        if(timedOut) throw new Error("음성 서버 응답이 90초 동안 완료되지 않아 중단했습니다. 연결 상태와 ElevenLabs 서비스 상태를 확인해주세요. 요청은 자동으로 재시도하지 않습니다.");
+        if(error instanceof TypeError || error?.name==="TypeError") throw new Error("음성 서버에 연결하지 못했습니다. HTML 파일을 내려받아 Chrome 또는 Edge에서 직접 열고 인터넷 연결을 확인해주세요. ("+(error.message||"네트워크 오류")+")");
+        throw error;
+    }finally{
+        clearTimeout(timeout);
+        if(progressTimer)clearInterval(progressTimer);
+        signal?.removeEventListener("abort",abortRequest);
+    }
+}
+
+
+/* =========================================================
+   13. 오디오 디코딩 / 이어붙이기
+========================================================= */
+function base64ToArrayBuffer(base64){
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for(let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return bytes.buffer;
+}
+
+function decodeAudio(audioCtx, arrayBuffer){
+    return new Promise((resolve, reject) => {
+        const p = audioCtx.decodeAudioData(arrayBuffer.slice(0), resolve, reject);
+        if(p && typeof p.then === "function") p.then(resolve, reject);
+    });
+}
+
+function concatenateAudioBuffers(audioCtx, buffers){
+    const channels = Math.max(...buffers.map(b => b.numberOfChannels));
+    const total = buffers.reduce((s, b) => s + b.length, 0);
+    const out = audioCtx.createBuffer(channels, Math.max(1, total), audioCtx.sampleRate);
+
+    let offset = 0;
+    for(const buffer of buffers){
+        for(let ch = 0; ch < channels; ch++){
+            out.getChannelData(ch).set(
+                buffer.getChannelData(Math.min(ch, buffer.numberOfChannels - 1)),
+                offset
+            );
+        }
+        offset += buffer.length;
+    }
+    return out;
+}
+
+function detectLeadingSilence(buffer, threshold = 0.008){
+    const data = buffer.getChannelData(0);
+    const sr = buffer.sampleRate;
+    const win = Math.max(1, Math.floor(sr * 0.005));
+    const limit = Math.min(data.length, Math.floor(sr * 2));
+
+    for(let i = 0; i < limit; i += win){
+        let peak = 0;
+        const end = Math.min(limit, i + win);
+        for(let j = i; j < end; j++){
+            const v = Math.abs(data[j]);
+            if(v > peak) peak = v;
+        }
+        if(peak > threshold) return i / sr;
+    }
+    return 0;
+}
+
+/* =========================================================
+   14. 타임스탬프 해석 및 엄격 보정
+========================================================= */
+function getAlignmentArrays(alignment){
+    const chars  = Array.isArray(alignment?.characters) ? alignment.characters : [];
+    const starts = Array.isArray(alignment?.character_start_times_seconds) ? alignment.character_start_times_seconds : [];
+    const ends   = Array.isArray(alignment?.character_end_times_seconds) ? alignment.character_end_times_seconds : [];
+    const valid  = chars.length > 0 && starts.length === chars.length && ends.length === chars.length;
+    return { chars, starts, ends, valid };
+}
+
+function normalizeAlignmentChar(ch){
+    if(ch === undefined || ch === null) return "";
+    const s = String(ch);
+    if(/\s/.test(s)) return " ";
+    return s.replace(/[""]/g, '"').replace(/['']/g, "'").replace(/[–—]/g, "-");
+}
+
+function firstSpeechTime(alignment){
+    const a = getAlignmentArrays(alignment);
+    if(!a.valid) return 0;
+    for(let i = 0; i < a.chars.length; i++){
+        if(!/\s/.test(String(a.chars[i] ?? "")) && isNum(a.starts[i])){
+            return Math.max(0, Number(a.starts[i]));
+        }
+    }
+    return 0;
+}
+
+function trimSpaces(chars, first, last){
+    while(first <= last && /\s/.test(String(chars[first] ?? ""))) first++;
+    while(last >= first && /\s/.test(String(chars[last] ?? ""))) last--;
+    return [first, last];
+}
+
+function timingsByIndex(lines, alignment, offset, duration){
+    const a = getAlignmentArrays(alignment);
+    if(!a.valid) return null;
+
+    const data = buildTextAndRanges(lines);
+    if(a.chars.length !== Array.from(data.text).length) return null;
+
+    const out = [];
+    for(const range of data.ranges){
+        const [first, last] = trimSpaces(a.chars, range.startIndex, range.endIndex - 1);
+        if(first > last || !isNum(a.starts[first]) || !isNum(a.ends[last])) return null;
+
+        const start = Math.max(0, Number(a.starts[first]));
+        const end = clamp(Number(a.ends[last]), start + 0.05, Math.max(0.1, duration));
+        out.push({ text: range.text, start: offset + start, end: offset + end, mode: "index" });
+    }
+    return out;
+}
+
+function timingsBySearch(lines, alignment, offset, duration){
+    const a = getAlignmentArrays(alignment);
+    if(!a.valid) return null;
+
+    const source = a.chars.map(normalizeAlignmentChar);
+    const out = [];
+    let from = 0;
+
+    for(const line of lines){
+        const target = Array.from(line).map(normalizeAlignmentChar).filter(ch => ch !== "");
+        if(!target.length) return null;
+
+        let found = -1;
+        for(let i = Math.max(0, from); i <= source.length - target.length; i++){
+            let ok = true;
+            for(let j = 0; j < target.length; j++){
+                if(source[i + j] !== target[j]){ ok = false; break; }
+            }
+            if(ok){ found = i; break; }
+        }
+        if(found < 0) return null;
+
+        const [first, last] = trimSpaces(a.chars, found, found + target.length - 1);
+        if(first > last || !isNum(a.starts[first]) || !isNum(a.ends[last])) return null;
+
+        const start = Math.max(0, Number(a.starts[first]));
+        const end = clamp(Number(a.ends[last]), start + 0.05, Math.max(0.1, duration));
+        out.push({ text: line, start: offset + start, end: offset + end, mode: "search" });
+        from = found + target.length;
+    }
+    return out;
+}
+
+function timingsByEstimate(lines, alignment, offset, duration){
+    const safeDuration = Math.max(0.3, Number(duration) || 0.3);
+    const speechStart = clamp(firstSpeechTime(alignment), 0, safeDuration * 0.4);
+    const usable = Math.max(0.2, safeDuration - speechStart);
+
+    const weights = lines.map(line => {
+        const compact = Array.from(line.replace(/\s/g, ""));
+        const punctuation = (line.match(/[,.!?…:;，。！？]/g) || []).length;
+        return Math.max(1, compact.length) + punctuation * 1.5;
+    });
+    const total = weights.reduce((s, v) => s + v, 0) || 1;
+
+    let cursor = speechStart;
+    return lines.map((line, i) => {
+        const start = cursor;
+        cursor += usable * (weights[i] / total);
+        const end = clamp(cursor, start + 0.1, safeDuration);
+        return { text: line, start: offset + start, end: offset + end, mode: "estimate" };
+    });
+}
+
+function buildLineTimings(lines, result, offset, duration){
+    const original = result.alignment || {};
+    const normalized = result.normalized_alignment || {};
+
+    return timingsByIndex(lines, original, offset, duration)
+        || timingsBySearch(lines, original, offset, duration)
+        || timingsBySearch(lines, normalized, offset, duration)
+        || timingsByEstimate(lines, original, offset, duration);
+}
+
+/* =========================================================
+   15. 타이밍 보정 및 연속성 강제 (싱크 밀림 방지 핵심)
+========================================================= */
+const MIN_LINE_DURATION = 0.25; // 자막이 최소한 유지되는 시간
+
+function repairTimings(timings, lines, totalDuration){
+    const fixed = [];
+    let prevStart = -1;
+    let repaired = 0;
+
+    for(let i = 0; i < lines.length; i++){
+        const src = timings[i];
+        let start = src && isNum(src.start) ? Number(src.start) : NaN;
+        let end = src && isNum(src.end) ? Number(src.end) : NaN;
+
+        if(!Number.isFinite(start) || start < 0){
+            start = prevStart < 0 ? 0 : prevStart + MIN_LINE_DURATION;
+            repaired++;
+        }
+        if(!Number.isFinite(end) || end <= start){
+            end = start + MIN_LINE_DURATION;
+            repaired++;
+        }
+
+        if(prevStart >= 0 && start < prevStart + 0.05){
+            start = prevStart + 0.05;
+            if(end <= start) end = start + MIN_LINE_DURATION;
+            repaired++;
+        }
+
+        fixed.push({
+            text: lines[i],
+            start,
+            end: Math.max(end, start + MIN_LINE_DURATION),
+            mode: src?.mode || "repair"
+        });
+        prevStart = start;
+    }
+
+    if(fixed.length) fixed[0].start = 0;
+
+    const total = Math.max(0, Number(totalDuration) || 0);
+    for(let i = 0; i < fixed.length; i++){
+        // [수정된 부분] 마지막 자막이 영상이 잘리기 전까지 안정적으로 남아있도록 3.0초 여유 할당
+        fixed[i].displayEnd = (i < fixed.length - 1)
+            ? Math.max(fixed[i].end, fixed[i + 1].start)
+            : total + 3.0; 
+    }
+
+    return { timings: fixed, repaired };
+}
+
+function createSubtitlePicker(timings){
+    let cursor = 0;
+    return function(now){
+        while(cursor + 1 < timings.length && now >= timings[cursor + 1].start) cursor++;
+        while(cursor > 0 && now < timings[cursor].start) cursor--;
+        const current = timings[cursor];
+        if(current && now >= current.start && now <= current.displayEnd){
+            return current;
+        }
+        return null;
+    };
+}
+
+/* =========================================================
+   16. 녹화기
+========================================================= */
+function createRecorder(stream){
+    if(typeof MediaRecorder === "undefined"){
+        throw new Error("이 브라우저는 화면 녹화를 지원하지 않습니다. 크롬을 사용해주세요.");
+    }
+
+    const candidates = [
+        { mimeType: "video/webm;codecs=vp8,opus", videoBitsPerSecond: 7000000, audioBitsPerSecond: 128000 },
+        { mimeType: "video/webm;codecs=vp9,opus", videoBitsPerSecond: 7000000, audioBitsPerSecond: 128000 },
+        { mimeType: "video/webm", videoBitsPerSecond: 7000000, audioBitsPerSecond: 128000 },
+        {}
+    ];
+
+    for(const opt of candidates){
+        try{
+            if(opt.mimeType && MediaRecorder.isTypeSupported && !MediaRecorder.isTypeSupported(opt.mimeType)) continue;
+            return new MediaRecorder(stream, opt);
+        }catch(e){}
+    }
+    throw new Error("녹화기를 만들지 못했습니다.");
+}
+
+/* 글꼴 선택: 웹 글꼴과 사용자가 직접 첨부한 글꼴을 같은 목록에서 사용합니다. */
+const SYSTEM_FONT_STACK = "'Apple SD Gothic Neo','Malgun Gothic',Arial,sans-serif";
+const fontCatalog = [
+    {id:"noto-sans", label:"Noto Sans KR · 또렷한 고딕", face:"Noto Sans KR", family:"'Noto Sans KR',"+SYSTEM_FONT_STACK, query:"Noto+Sans+KR:wght@400;700;900"},
+    {id:"black-han", label:"Black Han Sans · 굵은 제목체", face:"Black Han Sans", family:"'Black Han Sans',"+SYSTEM_FONT_STACK, query:"Black+Han+Sans"},
+    {id:"dohyeon", label:"도현 · 단단한 제목체", face:"Do Hyeon", family:"'Do Hyeon',"+SYSTEM_FONT_STACK, query:"Do+Hyeon"},
+    {id:"jua", label:"주아 · 둥근 제목체", face:"Jua", family:"'Jua',"+SYSTEM_FONT_STACK, query:"Jua"},
+    {id:"nanum-gothic", label:"나눔고딕 · 편안한 고딕", face:"Nanum Gothic", family:"'Nanum Gothic',"+SYSTEM_FONT_STACK, query:"Nanum+Gothic:wght@400;700;800"},
+    {id:"noto-serif", label:"Noto Serif KR · 차분한 명조", face:"Noto Serif KR", family:"'Noto Serif KR','Batang',serif", query:"Noto+Serif+KR:wght@400;700;900"},
+    {id:"nanum-myeongjo", label:"나눔명조 · 부드러운 명조", face:"Nanum Myeongjo", family:"'Nanum Myeongjo','Batang',serif", query:"Nanum+Myeongjo:wght@400;700;800"},
+    {id:"system", label:"내 컴퓨터 기본 고딕 · 오프라인 사용", family:SYSTEM_FONT_STACK, local:true},
+    {id:"system-serif", label:"내 컴퓨터 기본 명조 · 오프라인 사용", family:"'Batang','AppleMyungjo',serif", local:true}
+];
+const fontSelect = document.getElementById("subtitleFont");
+const fontFileInput = document.getElementById("fontFile");
+const fontStatus = document.getElementById("fontStatus");
+const fontSample = document.getElementById("fontSample");
+let selectedSubtitleFontId = fontCatalog.some(f=>f.id===safeGet("subtitle_font")) ? safeGet("subtitle_font") : "system";
+let customFontSequence = 0;
+let fontChangeSequence = 0;
+const fontPromises = new Map();
+const loadedFontCharacters = new Map();
+let fontImportPromise = Promise.resolve();
+let fontImporting = false;
+
+function populateFontSelect(){
+    fontSelect.replaceChildren(...fontCatalog.map(f=>{
+        const option=document.createElement("option");
+        option.value=f.id; option.textContent=f.label;
+        return option;
+    }));
+    fontSelect.value=selectedSubtitleFontId;
+}
+
+function resolveFont(id){
+    const font=fontCatalog.find(f=>f.id===id);
+    return font?.unavailable ? SYSTEM_FONT_STACK : (font?.family || SYSTEM_FONT_STACK);
+}
+
+function withTimeLimit(promise, ms, message){
+    return new Promise((resolve,reject)=>{
+        const timer=setTimeout(()=>reject(new Error(message)),ms);
+        Promise.resolve(promise).then(value=>{clearTimeout(timer);resolve(value);},error=>{clearTimeout(timer);reject(error);});
+    });
+}
+
+async function ensureFontFace(id=selectedSubtitleFontId){
+    const font=fontCatalog.find(f=>f.id===id);
+    if(!font || font.local) return true;
+    if(fontPromises.has(id)) return fontPromises.get(id);
+    const promise=(async()=>{
+        try{
+            if(!document.fonts) throw new Error("이 브라우저에서 사용자 글꼴을 지원하지 않습니다.");
+            if(font.query && !font.stylesheetLoaded){
+                await withTimeLimit(new Promise((resolve,reject)=>{
+                    const link=document.createElement("link");
+                    link.rel="stylesheet";
+                    link.href="https://fonts.googleapis.com/css2?family="+font.query+"&display=swap";
+                    link.onload=()=>{font.stylesheetLoaded=true;resolve();};
+                    link.onerror=()=>{link.remove();reject(new Error("웹 글꼴 연결 실패"));};
+                    document.head.appendChild(link);
+                }),4000,"웹 글꼴 연결 시간이 초과되었습니다.");
+            }
+            const faces=await withTimeLimit(document.fonts.load(`900 116px '${font.face}'`,"한글 영상 자막 가나다라마바사 Aa0123456789"),6000,"글꼴 로딩 시간이 초과되었습니다.");
+            if(!faces.length && !font.custom) throw new Error("글꼴을 찾지 못했습니다.");
+            font.unavailable=false;
+            layoutCache.clear();
+            return true;
+        }catch(error){
+            font.unavailable=true;
+            layoutCache.clear();
+            fontStatus.textContent=`${font.label.split(" · ")[0]}을 불러오지 못해 기본 고딕을 사용합니다. 인터넷 연결을 확인하거나 글꼴 파일을 첨부해주세요.`;
+            fontStatus.dataset.state="warning";
+            return false;
+        }
+    })();
+    fontPromises.set(id,promise);
+    return promise;
+}
+
+async function ensureFont(id=selectedSubtitleFontId,text=""){
+    const loaded=await ensureFontFace(id);
+    const font=fontCatalog.find(f=>f.id===id);
+    if(!loaded || font?.unavailable) return false;
+    if(!font || font.local || !text) return loaded;
+    try{
+        // Korean web fonts are split by unicode-range. Load the characters that
+        // will actually be drawn, not only a generic sample of Korean letters.
+        const loadedCharacters=loadedFontCharacters.get(id) || new Set();
+        const characters=Array.from(new Set(Array.from(String(text)))).filter(char=>!loadedCharacters.has(char)).join("");
+        if(!characters) return true;
+        await withTimeLimit(document.fonts.load(`900 116px '${font.face}'`,characters),8000,"대본에 사용하는 글꼴을 준비하지 못했습니다.");
+        for(const char of characters) loadedCharacters.add(char);
+        loadedFontCharacters.set(id,loadedCharacters);
+        layoutCache.clear();
+        return true;
+    }catch(error){
+        font.unavailable=true;
+        layoutCache.clear();
+        fontStatus.textContent="일부 글자를 불러오지 못해 기본 고딕으로 통일했습니다. 인터넷 연결을 확인하거나 글꼴 파일을 첨부해주세요.";
+        fontStatus.dataset.state="warning";
+        return false;
+    }
+}
+
+async function ensureFontReady(text=getManualLines().join("\n")){
+    await ensureFont(selectedSubtitleFontId,text);
+}
+
+function updateFontSample(){
+    fontSample.style.fontFamily=resolveFont(selectedSubtitleFontId);
+    layoutCache.clear();
+    if(activeProject) overlayEditor?.refresh();
+    else drawFrame(getSubtitleLayout(ctx,getManualLines()[0] || "원하는 글꼴로 자막을 만들어 보세요"));
+}
+
+fontSelect.addEventListener("change",async()=>{
+    const turn=++fontChangeSequence;
+    selectedSubtitleFontId=fontSelect.value;
+    const font=fontCatalog.find(f=>f.id===selectedSubtitleFontId);
+    if(font?.unavailable){fontPromises.delete(font.id);loadedFontCharacters.delete(font.id);}
+    safeSet("subtitle_font",selectedSubtitleFontId);
+    fontStatus.textContent="선택한 글꼴을 준비하고 있습니다…";
+    fontStatus.dataset.state="loading";
+    const loaded=await ensureFont(selectedSubtitleFontId,getManualLines().join("\n")+(activeProject?.timings.map(t=>t.text).join("\n") || "")+fontSample.textContent);
+    if(turn!==fontChangeSequence) return;
+    if(loaded){
+        fontStatus.textContent=font?.custom ? "첨부한 글꼴은 이 페이지를 열어 둔 동안 자막과 추가 텍스트에 사용할 수 있습니다." : "선택한 글꼴이 자막 전체와 편집 미리보기에 적용됩니다. 편집을 마치면 최종 영상 만들기를 눌러주세요.";
+        fontStatus.dataset.state="ready";
+    }
+    updateFontSample();
+    markResultDirty();
+});
+
+async function importFontFiles(files){
+    fontFileInput.disabled=true;
+    fontSelect.disabled=true;
+    fontChangeSequence++;
+    const added=[], errors=[];
+    for(const file of files){
+        try{
+            if(!/\.(ttf|otf|woff2?)$/i.test(file.name)) throw new Error("TTF, OTF, WOFF, WOFF2 파일을 선택해주세요.");
+            if(file.size>30*1024*1024) throw new Error("글꼴 파일은 30MB 이하로 첨부해주세요.");
+            const id="custom-font-"+(++customFontSequence);
+            const face="UserFont"+customFontSequence;
+            const fontFace=new FontFace(face,await file.arrayBuffer());
+            await fontFace.load();
+            document.fonts.add(fontFace);
+            const label=file.name.replace(/\.[^.]+$/,"")+" · 내 글꼴";
+            fontCatalog.push({id,label,face,family:`'${face}',${SYSTEM_FONT_STACK}`,custom:true,local:true});
+            selectedSubtitleFontId=id;
+            added.push(file.name);
+        }catch(error){errors.push(`${file.name}: ${error.message}`);}
+    }
+    populateFontSelect();
+    overlayEditor?.setFonts(fontCatalog);
+    updateFontSample();
+    if(added.length) markResultDirty();
+    fontStatus.textContent=[added.length ? `글꼴 ${added.length}개를 추가했습니다. 마지막으로 첨부한 글꼴을 자막에 적용했습니다.` : "",...errors].filter(Boolean).join(" ");
+    fontStatus.dataset.state=errors.length ? "warning" : "ready";
+    fontFileInput.value="";
+    fontFileInput.disabled=appBusy;
+    fontSelect.disabled=appBusy;
+}
+
+fontFileInput.addEventListener("change",()=>{
+    const files=Array.from(fontFileInput.files || []);
+    if(!files.length || appBusy || fontImporting) return;
+    fontImporting=true;
+    fontImportPromise=importFontFiles(files).catch(error=>{
+        fontStatus.textContent="글꼴 첨부 실패: "+error.message;
+        fontStatus.dataset.state="warning";
+    }).finally(()=>{fontImporting=false;fontFileInput.disabled=appBusy;fontSelect.disabled=appBusy;});
+});
+
+populateFontSelect();
+fontSample.style.fontFamily=resolveFont(selectedSubtitleFontId);
+
+/* 원본 음성과 자막 시간을 유지하는 영상 출력 / 편집 재출력 */
+let activeProject=null;
+let overlayEditor=null;
+let appBusy=false;
+let actionController=null;
+let lastObjectUrl="";
+let actionContext=null;
+let actionStage="준비";
+let actionKind="prepare";
+let lastCheckUrl="";
+const cancelButton=document.getElementById("cancelButton");
+const resultState=document.getElementById("resultState");
+const renderingSection=document.getElementById("renderingSection");
+const audioStartButton=document.getElementById("audioStartButton");
+const generationCheckButton=document.getElementById("generationCheckButton");
+const diagnosticText=document.getElementById("diagnosticText");
+const fallbackExportButton=document.getElementById("fallbackExportButton");
+
+function showStage(stage,detail="",notice=""){
+    actionStage=stage;
+    setStatus(stage,detail,notice);
+}
+
+function errorMessage(error){
+    let message=error?.message || String(error);
+    const key=apiInput.value.trim() || safeGet("eleven_api");
+    if(key) message=message.split(key).join("[API Key 숨김]");
+    return message;
+}
+
+function writeDiagnostics(error){
+    const details=[
+        "버전: 2026-11-24 한 번에 완성 r5",
+        "실행 단계: "+actionStage,
+        "페이지: "+(window.location?.protocol || "알 수 없음")+(window.top && window.top!==window.self ? " / 미리보기 또는 삽입 화면" : " / 단독 화면"),
+        "녹화 API: "+(typeof MediaRecorder!=="undefined" ? "지원" : "미지원"),
+        "캔버스 녹화: "+(typeof canvas.captureStream==="function" ? "지원" : "미지원"),
+        "오디오 상태: "+(actionContext?.state || "대기"),
+        "생성된 음성: "+(activeProject ? formatTime(activeProject.duration) : "없음")
+    ];
+    if(error)details.push("오류: "+errorMessage(error));
+    diagnosticText.textContent=details.join("\n");
+    if(error)document.getElementById("diagnosticPanel").open=true;
+}
+
+function markResultDirty(){
+    if(activeProject){
+        resultState.textContent=lastObjectUrl ? "편집 내용이 바뀌었습니다. ‘최종 영상 만들기’를 누르면 아래 영상에 반영됩니다." : "편집을 마친 뒤 ‘최종 영상 만들기’를 누르면 이곳에서 재생하고 다운로드할 수 있습니다.";
+        resultState.dataset.state="dirty";
+    }
+}
+
+function setAppBusy(value){
+    appBusy=value;
+    for(const element of [generateButton,applyButton,saveButton,apiInput,voiceInput,speedInput,imageInput,scriptInput,fontSelect,fontFileInput]) element.disabled=value;
+    fontSelect.disabled=value || fontImporting;
+    fontFileInput.disabled=value || fontImporting;
+    cancelButton.hidden=!value;
+    cancelButton.disabled=false;
+    generationCheckButton.disabled=value;
+    fallbackExportButton.hidden=!!overlayEditor || !activeProject;
+    fallbackExportButton.disabled=value || !activeProject;
+    if(!value)audioStartButton.hidden=true;
+    overlayEditor?.setBusy(value,actionKind);
+    if(value){video.pause(); overlayEditor?.pause();}
+    document.body.classList.toggle("is-rendering",value);
+}
+
+function throwIfCancelled(signal){
+    if(signal?.aborted) throw new DOMException("작업을 취소했습니다.","AbortError");
+}
+
+function assertRecordingSupported(){
+    if(typeof MediaRecorder==="undefined" || !canvas.captureStream || !(window.AudioContext || window.webkitAudioContext)){
+        throw new Error("이 브라우저는 영상 저장 기능을 지원하지 않습니다. 데스크톱 Chrome 또는 Edge에서 열어주세요.");
+    }
+}
+
+function drawProjectScene(target,time,project=activeProject,includeOverlays=false){
+    target.save();
+    target.setTransform(1,0,0,1,0,0);
+    target.globalAlpha=1;
+    target.shadowBlur=0;
+    target.shadowOffsetX=0;
+    target.shadowOffsetY=0;
+    target.clearRect(0,0,1920,1080);
+    if(project?.background) target.drawImage(project.background,0,0);
+    else {target.fillStyle="#10151d";target.fillRect(0,0,1920,1080);}
+    const drawCaptions=()=>{
+        const entry=project?.pickSubtitle(Math.max(0,time));
+        if(entry) drawSubtitle(target,getSubtitleLayout(target,entry.text));
+    };
+    if(includeOverlays && overlayEditor) overlayEditor.drawOverlays(target,time,drawCaptions);
+    else drawCaptions();
+    target.restore();
+}
+
+function drawProjectComposite(project,time,includeOverlays){
+    const frameTime=Math.min(Math.max(0,time),Math.max(0,project.duration-0.0001));
+    drawProjectScene(ctx,frameTime,project,includeOverlays);
+}
+
+function startAudioContext(audioContext){
+    if(!audioContext || audioContext.state==="closed")return;
+    // Invoke resume while the click still has user activation. A one-sample
+    // silent source also allows browsers that wait for a source before starting.
+    try{Promise.resolve(audioContext.resume()).catch(()=>{});}catch{}
+    try{
+        const silent=audioContext.createBufferSource();
+        silent.buffer=audioContext.createBuffer(1,1,audioContext.sampleRate || 44100);
+        silent.connect(audioContext.destination);
+        silent.onended=()=>{try{silent.disconnect();}catch{}};
+        silent.start(0);
+    }catch{}
+}
+
+async function waitForAudioRunning(audioContext,signal){
+    if(audioContext.state==="running")return;
+    startAudioContext(audioContext);
+    const started=performance.now();
+    let shown=false;
+    try{
+        while(audioContext.state!=="running"){
+            throwIfCancelled(signal);
+            if(audioContext.state==="closed")throw new Error("오디오 장치가 종료되었습니다. 저장 버튼을 다시 눌러주세요.");
+            const elapsed=performance.now()-started;
+            if(!shown && elapsed>500){
+                audioStartButton.hidden=false;
+                showStage("오디오 시작을 기다리고 있습니다.","아래 ‘오디오 시작하고 계속’ 버튼을 눌러주세요.","생성한 음성을 다시 요청하지 않고 현재 작업을 이어갑니다.");
+                shown=true;
+            }
+            if(elapsed>60000)throw new Error("브라우저에서 오디오 시작을 허용하지 않았습니다. 내려받은 HTML을 Chrome 또는 Edge에서 직접 열어주세요. 준비한 음성이 있다면 최종 영상 만들기로 다시 시도할 수 있습니다.");
+            await sleep(80);
+        }
+    }finally{audioStartButton.hidden=true;}
+}
+
+function waitForRecorderStop(recorder){
+    return new Promise((resolve,reject)=>{
+        const cleanup=()=>{
+            clearTimeout(timer);
+            recorder.removeEventListener("stop",finish);
+            recorder.removeEventListener("error",fail);
+        };
+        const finish=()=>{cleanup();resolve();};
+        const fail=(event)=>{cleanup();reject(event.error || new Error("영상 저장 중 오류가 발생했습니다."));};
+        const timer=setTimeout(()=>{cleanup();reject(new Error("녹화 마무리 시간이 초과되었습니다. 다시 저장해주세요."));},10000);
+        recorder.addEventListener("stop",finish,{once:true});
+        recorder.addEventListener("error",fail,{once:true});
+    });
+}
+
+async function recordProject(project,audioContext,signal,includeOverlays,options={}){
+    let recorder,source,videoStream,mixedStream,destination;
+    const chunks=[];
+    let recorderError=null;
+    try{
+        assertRecordingSupported();
+        showStage(options.check ? "3초 녹화 점검 준비 중…" : "최종 영상 준비 중…","글꼴과 녹화 환경을 확인합니다.");
+        if(!options.check)await ensureFontReady(project.timings.map(t=>t.text).join("\n"));
+        if(includeOverlays){
+            const textLayers=overlayEditor.getState().layers.filter(layer=>layer.type==="text");
+            await Promise.all(overlayEditor.getUsedFontIds().map(id=>ensureFont(id,textLayers.filter(layer=>layer.fontId===id).map(layer=>layer.text).join("\n"))));
+            overlayEditor.remeasureText?.();
+        }
+        throwIfCancelled(signal);
+        await waitForAudioRunning(audioContext,signal);
+        drawProjectComposite(project,0,includeOverlays);
+        videoStream=canvas.captureStream(30);
+        destination=audioContext.createMediaStreamDestination();
+        source=audioContext.createBufferSource();
+        source.buffer=project.audioBuffer;
+        source.connect(destination);
+        mixedStream=new MediaStream([...videoStream.getVideoTracks(),...destination.stream.getAudioTracks()]);
+        recorder=createRecorder(mixedStream);
+        recorder.ondataavailable=event=>{if(event.data?.size) chunks.push(event.data);};
+        recorder.onerror=event=>{recorderError=event.error || new Error("녹화 오류가 발생했습니다.");};
+
+        recorder.start(1000);
+        const startAt=audioContext.currentTime+0.12;
+        const startedWallClock=performance.now();
+        const timeout=Math.max(15000,(project.duration+20)*1000);
+        let ended=false;
+        source.onended=()=>{ended=true;};
+        source.start(startAt);
+        const heading=options.check ? "3초 녹화 점검 중" : "최종 영상 생성 중";
+        actionStage=heading;
+        const warning=[...project.warnings,"저장 중에는 이 탭을 화면에 열어 두세요. 영상 길이만큼 시간이 걸립니다."].join("\n");
+        while(true){
+            throwIfCancelled(signal);
+            if(recorderError) throw recorderError;
+            const elapsed=Math.max(0,audioContext.currentTime-startAt);
+            drawProjectComposite(project,elapsed,includeOverlays);
+            const percentage=Math.min(100,Math.floor(elapsed/project.duration*100));
+            setStatus(`${heading}… ${percentage}%`,`${formatTime(Math.min(elapsed,project.duration))} / ${formatTime(project.duration)}`,warning);
+            if(includeOverlays) overlayEditor.setProgress?.(percentage,Math.min(elapsed,project.duration),project.duration);
+            if(ended && elapsed>=project.duration+0.35) break;
+            if(performance.now()-startedWallClock>timeout) throw new Error("영상 저장이 지연되어 중단했습니다. 이 탭을 화면에 열어 둔 상태에서 다시 저장해주세요.");
+            await sleep(33);
+        }
+        throwIfCancelled(signal);
+        if(recorder.state!=="inactive"){
+            const stopped=waitForRecorderStop(recorder);
+            recorder.stop();
+            await stopped;
+        }
+        throwIfCancelled(signal);
+        if(recorderError) throw recorderError;
+        if(!chunks.length) throw new Error("녹화된 데이터가 없습니다. 다시 저장해주세요.");
+        const blob=new Blob(chunks,{type:recorder.mimeType || "video/webm"});
+        if(blob.size<1024) throw new Error("영상 데이터가 비어 있습니다. 다시 저장해주세요.");
+        return blob;
+    }finally{
+        try{if(source) source.stop();}catch{}
+        try{source?.disconnect();}catch{}
+        try{if(recorder && recorder.state!=="inactive") recorder.stop();}catch{}
+        try{videoStream?.getTracks().forEach(track=>track.stop());}catch{}
+        try{mixedStream?.getTracks().forEach(track=>track.stop());}catch{}
+        try{destination?.stream.getTracks().forEach(track=>track.stop());}catch{}
+    }
+}
+
+function showResult(blob){
+    const oldUrl=lastObjectUrl;
+    lastObjectUrl=URL.createObjectURL(blob);
+    video.src=lastObjectUrl;
+    video.load();
+    downloadLink.href=lastObjectUrl;
+    const extension=blob.type.includes("mp4") ? "mp4" : "webm";
+    downloadLink.download=`longform_16x9_final.${extension}`;
+    downloadLink.textContent="최종 영상 다운로드";
+    downloadLink.style.display="inline-flex";
+    resultState.textContent="음성·자막과 편집 내용을 합친 최종 영상입니다. 아래에서 재생하고 다운로드할 수 있습니다.";
+    resultState.dataset.state="ready";
+    overlayEditor?.setExported?.();
+    if(oldUrl) URL.revokeObjectURL(oldUrl);
+}
+
+async function openAction(kind="render"){
+    assertRecordingSupported();
+    actionKind=kind;
+    actionController=new AbortController();
+    setAppBusy(true);
+    renderingSection.open=kind!=="prepare";
+    actionContext=new (window.AudioContext || window.webkitAudioContext)();
+    // Decoding does not need playback to be running. Do not block the TTS
+    // request on resume(); playback is checked immediately before recording.
+    startAudioContext(actionContext);
+    await withTimeLimit(fontImportPromise,20000,"첨부한 글꼴 준비가 지연되고 있습니다. 글꼴을 다시 첨부해주세요.");
+    throwIfCancelled(actionController.signal);
+    return {signal:actionController.signal,context:actionContext};
+}
+
+async function closeAction(){
+    try{if(actionContext && actionContext.state!=="closed") await actionContext.close();}catch{}
+    actionContext=null;
+    actionController=null;
+    setAppBusy(false);
+}
+
+async function prepareProject(){
+    if(appBusy) return;
+    let createdProject=false;
+    try{
+        showStage("음성·자막 준비 중…","입력한 설정을 확인합니다. 준비가 끝나면 바로 편집할 수 있습니다.");
+        const api=apiInput.value.trim() || safeGet("eleven_api");
+        const voice=voiceInput.value.trim() || safeGet("voice_id");
+        const speed=speedInput.value || "1";
+        const lines=getManualLines();
+        if(!api || !voice) throw new Error("ElevenLabs API Key와 Voice ID를 입력해주세요.");
+        if(!lines.length) throw new Error("한 줄에 자막 하나씩 대본을 입력해주세요.");
+        if(!imageInput.files[0] && !currentImageData) throw new Error("배경 이미지를 첨부해주세요.");
+        const {signal,context}=await openAction("prepare");
+        showStage("자막 글꼴 준비 중…","선택한 글꼴을 불러옵니다. 연결되지 않으면 기본 글꼴로 계속합니다.");
+        await ensureFontReady();
+        throwIfCancelled(signal);
+        showStage("배경 이미지 준비 중…","이미지를 1920×1080 화면에 맞추고 있습니다.");
+        if(imageInput.files[0]) currentImageData=await withTimeLimit(optimizeImage(imageInput.files[0]),30000,"배경 이미지를 읽지 못했습니다. JPG 또는 PNG 파일을 다시 첨부해주세요.");
+        const img=await withTimeLimit(loadImage(currentImageData),15000,"배경 이미지를 불러오지 못했습니다. 이미지를 다시 첨부해주세요.");
+        buildBackground(img);
+        const projectBackground=backgroundCanvas;
+        drawFrame(null);
+        showStage("자막 검사 중…","입력한 줄바꿈과 글자 크기를 확인합니다.");
+        await applyManualSubtitles();
+        const batches=buildBatches(lines);
+        const buffers=[], rawTimings=[];
+        const modeCount={index:0,search:0,estimate:0};
+        let offset=0;
+        for(let i=0;i<batches.length;i++){
+            throwIfCancelled(signal);
+            showStage("음성·자막 준비 중…",`${i+1} / ${batches.length} 구간 · 음성 서버에 요청했습니다.`);
+            const result=await requestTtsBatch(api,voice,batches[i],speed,signal,seconds=>setStatus("음성·자막 준비 중…",`${i+1} / ${batches.length} 구간 · 응답 대기 ${seconds}초`,"각 구간은 최대 90초까지 기다립니다."));
+            throwIfCancelled(signal);
+            showStage("생성된 음성 확인 중…",`${i+1} / ${batches.length} 구간 · 자막 시간을 맞춥니다.`);
+            const decoded=await withTimeLimit(decodeAudio(context,base64ToArrayBuffer(result.audio_base64)),30000,"받은 음성 데이터를 읽지 못했습니다. 음성 응답 형식을 확인해야 합니다.");
+            const correction=clamp(detectLeadingSilence(decoded)-firstSpeechTime(result.alignment || {}),0,0.1);
+            const batchTimings=buildLineTimings(batches[i],result,offset+correction,decoded.duration);
+            batchTimings.forEach(t=>{if(modeCount[t.mode]!==undefined) modeCount[t.mode]++;});
+            buffers.push(decoded);
+            rawTimings.push(...batchTimings);
+            offset+=decoded.duration;
+        }
+        throwIfCancelled(signal);
+        const finalAudio=concatenateAudioBuffers(context,buffers);
+        buffers.length=0;
+        if(!Number.isFinite(finalAudio.duration) || finalAudio.duration<=0) throw new Error("생성된 음성 길이가 올바르지 않습니다.");
+        const {timings,repaired}=repairTimings(rawTimings,lines,finalAudio.duration);
+        const warnings=[];
+        if(modeCount.estimate) warnings.push(`${modeCount.estimate}줄은 추정 타이밍을 사용했습니다.`);
+        if(repaired) warnings.push(`${repaired}곳의 시간 간격을 자동 보정했습니다.`);
+        activeProject={audioBuffer:finalAudio,timings,background:projectBackground,duration:finalAudio.duration,warnings,pickSubtitle:createSubtitlePicker(timings)};
+        createdProject=true;
+        resultState.textContent=lastObjectUrl ? "새 음성과 자막을 준비했습니다. 아래 영상은 이전 결과이며, ‘최종 영상 만들기’를 누르면 새 편집 내용으로 바뀝니다." : "음성과 자막을 준비했습니다. 편집을 마친 뒤 ‘최종 영상 만들기’를 누르면 완성된 영상이 여기에 표시됩니다.";
+        resultState.dataset.state="dirty";
+        overlayEditor?.setProject({audioBuffer:finalAudio,duration:finalAudio.duration});
+        overlayEditor?.setBusy(true,"prepare");
+        drawProjectScene(ctx,0);
+        generateButton.textContent="음성·자막 새로 준비하기";
+        // Preparation ends here: the editor previews the cached AudioBuffer and
+        // canvas directly. MediaRecorder is used only by the final export action.
+        setStatus("음성·자막 준비 완료",`${formatTime(finalAudio.duration)} / 자막 ${timings.length}줄 — 미리보기에서 이미지·텍스트를 편집한 뒤 ‘최종 영상 만들기’를 누르세요.`,warnings.join("\n"));
+        actionStage="음성·자막 준비 완료";writeDiagnostics();
+    }catch(error){
+        const cancelled=error?.name==="AbortError";
+        writeDiagnostics(error);
+        const recovery=createdProject ? "준비한 음성이 남아 있습니다. 최종 영상 만들기로 이어갈 수 있습니다." : "아래 문제 확인 정보에 멈춘 단계와 오류가 표시됩니다.";
+        setStatus(cancelled ? "준비 작업을 취소했습니다." : "음성·자막을 준비하지 못했습니다.",cancelled ? "이전에 준비한 편집 내용과 완료된 영상은 유지됩니다." : `${actionStage}\n${errorMessage(error)}`,recovery);
+    }finally{
+        await closeAction();
+        if(createdProject){
+            renderingSection.open=!overlayEditor;
+            document.getElementById(overlayEditor ? "overlayEditor" : "renderingSection").scrollIntoView?.({behavior:"smooth",block:"start"});
+        }
+    }
+}
+
+async function exportFinalVideo(){
+    if(appBusy || !activeProject) return;
+    try{
+        showStage("최종 영상 만들기 준비 중…","준비한 음성·자막과 이미지·텍스트를 함께 영상으로 만듭니다.");
+        const {signal,context}=await openAction();
+        renderingSection.open=true;
+        const blob=await recordProject(activeProject,context,signal,!!overlayEditor);
+        showResult(blob);
+        setStatus("최종 영상 생성 완료",`${formatTime(activeProject.duration)} / ${(blob.size/1048576).toFixed(1)}MB — 결과 영상에서 확인한 뒤 다운로드하세요.`,"준비한 음성을 사용해 이미지·텍스트와 함께 한 번에 완성했습니다.");
+        actionStage="최종 영상 생성 완료";writeDiagnostics();
+    }catch(error){
+        writeDiagnostics(error);
+        setStatus(error?.name==="AbortError" ? "최종 영상 생성을 취소했습니다." : "최종 영상을 만들지 못했습니다.",error?.name==="AbortError" ? "준비한 음성·편집 내용과 이전 다운로드 영상은 유지됩니다." : `${actionStage}\n${errorMessage(error)}`);
+    }finally{
+        await closeAction();
+    }
+}
+
+async function runGenerationCheck(){
+    if(appBusy)return;
+    try{
+        showStage("영상 생성 기능을 점검합니다…","API를 호출하지 않고 3초짜리 테스트 영상을 만듭니다.");
+        const {signal,context}=await openAction();
+        const audio=context.createBuffer(1,Math.floor(context.sampleRate*3),context.sampleRate);
+        const samples=audio.getChannelData(0);
+        for(let i=0;i<samples.length;i++)samples[i]=Math.sin(2*Math.PI*440*i/context.sampleRate)*0.04;
+        const background=document.createElement("canvas");background.width=1920;background.height=1080;
+        const c=background.getContext("2d");c.fillStyle="#132b38";c.fillRect(0,0,1920,1080);
+        c.fillStyle="#73e5b8";c.fillRect(220,240,1480,12);c.fillStyle="#ffffff";
+        c.textAlign="center";c.font="900 92px "+SYSTEM_FONT_STACK;c.fillText("영상 생성 기능 점검",960,510);
+        c.font="44px "+SYSTEM_FONT_STACK;c.fillText("3초 테스트 · API 사용 없음",960,620);
+        const project={audioBuffer:audio,duration:3,background,timings:[],warnings:[],pickSubtitle:()=>null};
+        const blob=await recordProject(project,context,signal,false,{check:true});
+        if(lastCheckUrl)URL.revokeObjectURL(lastCheckUrl);
+        lastCheckUrl=URL.createObjectURL(blob);
+        const preview=document.getElementById("diagnosticVideo");preview.src=lastCheckUrl;preview.hidden=false;preview.load();
+        document.getElementById("diagnosticPanel").open=true;
+        actionStage="녹화 점검 완료";writeDiagnostics();
+        setStatus("영상 녹화 점검 완료",`${(blob.size/1024).toFixed(0)}KB 테스트 영상을 만들었습니다. 아래에서 재생해 확인해주세요.`,"이 점검은 ElevenLabs API를 사용하지 않았습니다. 실제 대본 생성이 실패하면 표시되는 음성 요청 오류를 확인해주세요.");
+    }catch(error){
+        writeDiagnostics(error);
+        setStatus(error?.name==="AbortError" ? "점검을 취소했습니다." : "영상 녹화 점검 실패",errorMessage(error),"아래 문제 확인 정보의 오류 문구를 확인해주세요.");
+    }finally{await closeAction();}
+}
+
+audioStartButton.addEventListener("click",()=>startAudioContext(actionContext));
+generationCheckButton.addEventListener("click",runGenerationCheck);
+fallbackExportButton.addEventListener("click",exportFinalVideo);
+
+cancelButton.addEventListener("click",()=>{
+    actionController?.abort();
+    cancelButton.disabled=true;
+    setStatus("작업을 취소하고 있습니다…","잠시만 기다려주세요.");
+});
+window.addEventListener("beforeunload",event=>{
+    if(activeProject || appBusy || overlayEditor?.getState().layers.length){event.preventDefault();event.returnValue="";}
+});
+window.addEventListener("pagehide",()=>{
+    actionController?.abort();
+    overlayEditor?.pause();
+});
+
+
+/* Standalone editor. All dimensions are stored in the output's 1920 x 1080 pixels. */
+window.createOverlayEditor = function createOverlayEditor(config) {
+    "use strict";
+    const W = 1920, H = 1080;
+    const root = document.getElementById("overlayEditor");
+    const el = id => document.getElementById("ov" + id);
+    const stage = el("Canvas"), ctx = stage.getContext("2d", { alpha:false });
+    const assets = new Map();
+    const menu = el("Menu");
+    // The generated caption track sits between layers[subtitleIndex-1] and layers[subtitleIndex].
+    let subtitleIndex = 0, copiedImage = null;
+    let project = null, layers = [], selectedId = null, time = 0;
+    let busy = false, busyMode = "prepare", uploading = false, dirty = false, sequence = 0, projectEpoch = 0;
+    let history = [], future = [], gesture = null, fonts = config.fonts || [];
+    let audioContext = null, audioSource = null, playing = false, playOffset = 0, playStartedAt = 0;
+    let animation = 0, playEpoch = 0, editGroup = null, textFontTimer = null;
+    const finite = (v, fallback=0) => Number.isFinite(Number(v)) ? Number(v) : fallback;
+    const bound = (v, a, b) => Math.min(Math.max(a, v), Math.max(a, b));
+    const duration = () => project ? Math.max(0.01, finite(project.duration, 0.01)) : 0;
+    const canEdit = () => !busy && !uploading;
+    let clipboardRequest = 0;
+    const defaultPasteHint = el("PasteHint").textContent;
+    const selected = () => layers.find(l => l.id === selectedId) || null;
+    const uid = prefix => prefix + "-" + (++sequence);
+    const cloneLayers = () => layers.map(l => ({...l, lines: l.lines ? l.lines.slice() : undefined}));
+    const at = (l, atTime) => atTime >= l.start && (atTime < l.end || (l.end >= duration() - 0.001 && atTime <= duration() + 0.001));
+
+    function stamp(seconds) {
+        const s = Math.max(0, finite(seconds));
+        const minutes = Math.floor(s / 60);
+        return String(minutes).padStart(2,"0") + ":" + (s % 60).toFixed(1).padStart(4,"0");
+    }
+
+    function message(text, error=false) {
+        el("Message").textContent = text;
+        el("Message").classList.toggle("ov-error", error);
+    }
+
+    function snapshot() { return {layers:cloneLayers(), selectedId, subtitleIndex}; }
+
+    function pushHistory(group=null) {
+        const now = performance.now();
+        if(group && editGroup && editGroup.key === group && now - editGroup.at < 700) {
+            editGroup.at = now;
+            return;
+        }
+        history.push(snapshot());
+        if(history.length > 40) history.shift();
+        future = [];
+        editGroup = group ? {key:group, at:now} : null;
+    }
+
+    function notifyChange() {
+        dirty = true;
+        try { if(config.onChange) config.onChange(); } catch(e) { console.warn(e); }
+        updateControls();
+    }
+
+    function textFont(l) {
+        let family = "'Malgun Gothic',sans-serif";
+        try { family = config.resolveFont(l.fontId) || family; } catch(e) {}
+        return "900 " + l.fontSize + "px " + family;
+    }
+
+    function wrapText(c, text, maxWidth) {
+        const out = [];
+        for(const paragraph of String(text || "").replace(/\r/g,"").split("\n")) {
+            if(!paragraph) { out.push(""); continue; }
+            if(c.measureText(paragraph).width <= maxWidth) { out.push(paragraph); continue; }
+            let current = "";
+            for(const char of Array.from(paragraph)) {
+                if(current && c.measureText(current + char).width > maxWidth) { out.push(current); current = char; }
+                else current += char;
+            }
+            out.push(current);
+        }
+        return out.length ? out : [""];
+    }
+
+    function measureTextLayer(l, keepInside=true) {
+        l.fontSize = bound(finite(l.fontSize,76), 12,240);
+        for(let tries=0; tries<8; tries++) {
+            ctx.save();
+            ctx.font = textFont(l);
+            l.padding = Math.max(8, Math.round(l.fontSize * 0.19));
+            l.lines = wrapText(ctx, l.text, W - l.padding * 2 - 2);
+            l.w = Math.min(W, Math.max(l.fontSize * 1.1, ...l.lines.map(line => ctx.measureText(line).width)) + l.padding * 2);
+            l.h = l.lines.length * l.fontSize * 1.25 + l.padding * 2;
+            ctx.restore();
+            if(l.h <= H || l.fontSize <= 12) break;
+            l.fontSize = Math.max(12, Math.floor(l.fontSize * H / l.h));
+        }
+        // A very large block remains inside the canvas; content is clipped to its box.
+        l.h = Math.min(H, l.h);
+        if(keepInside) keepInFrame(l);
+    }
+
+    function keepInFrame(l) {
+        l.w = bound(finite(l.w,100), 1,W);
+        l.h = bound(finite(l.h,100), 1,H);
+        l.x = bound(finite(l.x), 0,W-l.w);
+        l.y = bound(finite(l.y), 0,H-l.h);
+        l.opacity = bound(finite(l.opacity,1), 0.05,1);
+    }
+
+    function roundedBox(c,x,y,w,h,r) {
+        r = Math.min(r,w/2,h/2);
+        c.beginPath(); c.moveTo(x+r,y); c.lineTo(x+w-r,y); c.quadraticCurveTo(x+w,y,x+w,y+r);
+        c.lineTo(x+w,y+h-r); c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+        c.lineTo(x+r,y+h); c.quadraticCurveTo(x,y+h,x,y+h-r);
+        c.lineTo(x,y+r); c.quadraticCurveTo(x,y,x+r,y); c.closePath();
+    }
+
+    function drawOverlays(c, atTime, drawCaptions) {
+        for(let i=0; i<=layers.length; i++) {
+            if(i===subtitleIndex) drawCaptions?.();
+            const l=layers[i];
+            if(!l || !at(l, atTime)) continue;
+            c.save();
+            c.globalAlpha = l.opacity;
+            if(l.type === "image") {
+                const asset = assets.get(l.assetId);
+                if(asset) c.drawImage(asset.image, l.x,l.y,l.w,l.h);
+            } else {
+                c.font = textFont(l);
+                c.textAlign = "left"; c.textBaseline = "middle";
+                c.lineJoin = "round"; c.lineCap = "round";
+                if(l.background) {
+                    roundedBox(c,l.x,l.y,l.w,l.h,Math.max(6,l.fontSize*.12));
+                    c.fillStyle = "rgba(0,0,0,.76)"; c.fill();
+                }
+                c.beginPath(); c.rect(l.x,l.y,l.w,l.h); c.clip();
+                const lineHeight = l.fontSize*1.25;
+                for(let i=0;i<(l.lines||[]).length;i++) {
+                    const y = l.y+l.padding+lineHeight*(i+.5);
+                    if(l.outline) {
+                        c.strokeStyle="#000000"; c.lineWidth=Math.max(2,l.fontSize*.09);
+                        c.strokeText(l.lines[i],l.x+l.padding,y);
+                    }
+                    c.fillStyle=l.color; c.fillText(l.lines[i],l.x+l.padding,y);
+                }
+            }
+            c.restore();
+        }
+    }
+
+    function displayScale() { return Math.max(0.05, stage.getBoundingClientRect().width / W); }
+    function handles(l) {
+        const left=l.x, right=l.x+l.w, top=l.y, bottom=l.y+l.h;
+        const midX=(left+right)/2, midY=(top+bottom)/2;
+        const points=[{name:"nw",x:left,y:top},{name:"ne",x:right,y:top},
+                      {name:"se",x:right,y:bottom},{name:"sw",x:left,y:bottom}];
+        if(l.type==="image"){
+            points.push({name:"w",x:left,y:midY},{name:"e",x:right,y:midY},
+                        {name:"n",x:midX,y:top},{name:"s",x:midX,y:bottom});
+        }
+        return points;
+    }
+
+    function drawSelection() {
+        const l=selected();
+        if(!l || !at(l,time) || playing || busy) return;
+        const scale=displayScale(), size=10/scale;
+        ctx.save(); ctx.strokeStyle="#5ff5ad"; ctx.lineWidth=2/scale;
+        ctx.strokeRect(l.x,l.y,l.w,l.h);
+        ctx.fillStyle="#e2fff1";
+        for(const h of handles(l)) { ctx.fillRect(h.x-size/2,h.y-size/2,size,size); ctx.strokeRect(h.x-size/2,h.y-size/2,size,size); }
+        ctx.restore();
+    }
+
+    function refresh() {
+        ctx.save(); ctx.clearRect(0,0,W,H); ctx.fillStyle="#0b1018";ctx.fillRect(0,0,W,H);
+        if(project) {
+            try { config.drawScene(ctx,time); } catch(e) { console.error("미리보기 그리기 실패",e); }
+        } else drawOverlays(ctx,time);
+        drawSelection();
+        ctx.restore();
+        el("Seek").value = String(time);
+        el("Time").textContent = stamp(time) + " / " + stamp(duration());
+        const l=selected();
+        el("GoStart").hidden = !l || at(l,time);
+    }
+
+    function renderList() {
+        const list=el("LayerList"); list.replaceChildren();
+        el("Count").textContent=layers.length+"개";
+        if(!layers.length) {
+            const p=document.createElement("p"); p.className="ov-no-layers";p.textContent="아직 추가한 요소가 없습니다.";list.appendChild(p);return;
+        }
+        for(const l of stackingOrder().reverse()) {
+            if(!l){
+                const divider=document.createElement("div");
+                divider.className="ov-subtitle-track";divider.textContent="기본 자막";list.appendChild(divider);continue;
+            }
+            const button=document.createElement("button");button.type="button";
+            button.className="ov-layer-item"+(l.id===selectedId?" ov-selected":"");
+            button.disabled=!canEdit();button.dataset.layerId=l.id;
+            button.setAttribute("aria-pressed",String(l.id===selectedId));
+            const icon=document.createElement("span");icon.className="ov-layer-icon";icon.textContent=l.type==="image"?"IMG":"T";
+            const body=document.createElement("span");body.className="ov-layer-body";
+            const name=document.createElement("span");name.className="ov-layer-name";name.textContent=l.type==="image"?l.name:(l.text.trim()||"빈 텍스트");
+            const detail=document.createElement("span");detail.className="ov-layer-detail";detail.textContent=project?stamp(l.start)+" – "+stamp(l.end):"영상 전체";
+            body.append(name,detail);button.append(icon,body);
+            button.addEventListener("click",()=>{if(!canEdit())return;pause();selectedId=l.id;editGroup=null;syncProperties();renderList();refresh();});
+            button.addEventListener("contextmenu",e=>openOrderMenu(e,l));
+            list.appendChild(button);
+        }
+    }
+
+    function updateControls() {
+        const ready=canEdit(), l=selected();
+        el("PasteImage").disabled=!ready;
+        for(const name of ["AddImage","ImageInput","AddText","Play","Back","Seek","Export","Start","End","Whole","Here"]) el(name).disabled=!ready||!project;
+        el("Undo").disabled=!ready||!history.length;el("Redo").disabled=!ready||!future.length;
+        el("Fields").disabled=!ready||!l;
+        const order=stackingOrder();
+        el("Forward").disabled=el("ToFront").disabled=!ready||!l||l===order[order.length-1];
+        el("Backward").disabled=el("ToBack").disabled=!ready||!l||l===order[0];
+        if(!ready) closeMenu();
+        el("Play").textContent=playing?"❚❚ 일시정지":"▶ 재생";
+        el("Export").textContent=busy ? (busyMode==="prepare" ? "음성·자막 준비 중…" : "최종 영상 만드는 중…") : "최종 영상 만들기";
+        el("Play").setAttribute("aria-label",playing?"편집 영상 미리보기 일시정지":"편집 영상 미리보기 재생");
+        el("Empty").hidden=!!project||layers.length>0;
+        el("Badge").textContent=busy ? (busyMode==="prepare" ? "음성·자막 준비 중" : "최종 영상 생성 중") : uploading?"이미지 불러오는 중":!project?"음성·자막 준비 전":dirty?"편집 내용 있음":"편집 준비 완료";
+        el("Badge").classList.toggle("ov-dirty",!!project&&dirty&&!busy);
+        el("Badge").classList.toggle("ov-ready",!!project&&!dirty&&!busy);
+        for(const item of el("LayerList").querySelectorAll("button")) item.disabled=!ready;
+    }
+
+    function syncProperties() {
+        const l=selected();
+        el("Fields").hidden=!l;el("SelectHint").hidden=!!l;
+        el("Type").textContent=l?(l.type==="image"?"이미지":"텍스트"):"선택 없음";
+        if(l) {
+            el("TextFields").hidden=l.type!=="text";
+            el("SizeHint").textContent=l.type==="image"?"너비와 높이를 각각 입력할 수 있습니다.":"텍스트 크기를 글자 비율에 맞춰 조절합니다.";
+            for(const [id,key] of [["X","x"],["Y","y"],["Width","w"],["Height","h"]])el(id).value=String(Math.round(l[key]));
+            el("Start").value=String(Math.round(l.start*100)/100);el("End").value=String(Math.round(l.end*100)/100);
+            el("Start").max=String(duration());el("End").max=String(duration());
+            el("Opacity").value=String(Math.round(l.opacity*100));el("OpacityValue").textContent=Math.round(l.opacity*100)+"%";
+            if(l.type==="text") {
+                if(document.activeElement!==el("Text"))el("Text").value=l.text;
+                el("Font").value=l.fontId;el("FontSize").value=String(Math.round(l.fontSize));el("Color").value=l.color;
+                el("Outline").checked=!!l.outline;el("Background").checked=!!l.background;
+            }
+        }
+        updateControls();
+    }
+
+    function changed({properties=true,list=true}={}) {
+        notifyChange();if(properties)syncProperties();if(list)renderList();refresh();
+    }
+
+    function mutate(action, group=null, options={}) {
+        if(!canEdit()||!selected())return;
+        pause();pushHistory(group);action(selected());changed(options);
+    }
+
+    function restore(from,to) {
+        if(!canEdit()||!from.length)return;
+        pause();to.push(snapshot());const saved=from.pop();layers=saved.layers;selectedId=saved.selectedId;subtitleIndex=saved.subtitleIndex;
+        for(const l of layers)if(l.type==="text")measureTextLayer(l);
+        editGroup=null;changed();message("편집 상태를 복원했습니다.");
+    }
+
+    function pause() {
+        playEpoch++;
+        if(playing&&audioContext)time=bound(playOffset+audioContext.currentTime-playStartedAt,0,duration());
+        playing=false;
+        if(animation)cancelAnimationFrame(animation);animation=0;
+        if(audioSource) {audioSource.onended=null;try{audioSource.stop();}catch(e){}try{audioSource.disconnect();}catch(e){}audioSource=null;}
+        updateControls();refresh();
+    }
+
+    async function play() {
+        if(!project||!canEdit())return;
+        if(playing){pause();return;}
+        if(!project.audioBuffer){message("미리보기 음성이 없습니다. 음성·자막을 먼저 준비해주세요.",true);return;}
+        const epoch=++playEpoch;
+        try {
+            if(!audioContext||audioContext.state==="closed")audioContext=new(window.AudioContext||window.webkitAudioContext)();
+            // Resume occurs in the user's click handler, before any unrelated asynchronous work.
+            config.startAudioContext?.(audioContext);
+            await new Promise((resolve,reject)=>{
+                const timer=setTimeout(()=>reject(new Error("오디오 시작이 지연됩니다. 재생 버튼을 다시 눌러 주세요.")),8000);
+                Promise.resolve(audioContext.resume()).then(value=>{clearTimeout(timer);resolve(value);},error=>{clearTimeout(timer);reject(error);});
+            });
+            if(epoch!==playEpoch||!canEdit())return;
+            if(audioContext.state!=="running")throw new Error("재생을 허용한 후 다시 눌러 주세요.");
+            if(time>=duration()-.01)time=0;
+            audioSource=audioContext.createBufferSource();audioSource.buffer=project.audioBuffer;audioSource.connect(audioContext.destination);
+            playOffset=time;playStartedAt=audioContext.currentTime;playing=true;
+            audioSource.onended=()=>{
+                if(epoch!==playEpoch)return;
+                time=duration();playing=false;
+                if(animation)cancelAnimationFrame(animation);animation=0;
+                try{audioSource.disconnect();}catch(e){}audioSource=null;updateControls();refresh();
+            };
+            audioSource.start(0,Math.min(time,project.audioBuffer.duration));
+            const tick=()=>{if(!playing||epoch!==playEpoch)return;time=bound(playOffset+audioContext.currentTime-playStartedAt,0,duration());refresh();animation=requestAnimationFrame(tick);};
+            updateControls();tick();
+        }catch(e){if(epoch!==playEpoch)return;pause();message("미리보기를 재생하지 못했습니다. "+(e.message||String(e)),true);}
+    }
+
+    function seek(value) {
+        if(!project||busy)return;
+        pause();time=bound(finite(value),0,duration());refresh();
+    }
+
+    function baseLayer(type) {
+        const d=duration(),start=bound(time,0,Math.max(0,d-.01));
+        return {id:uid(type),type,x:0,y:0,w:100,h:100,start,end:d,opacity:1};
+    }
+
+    async function loadFile(file) {
+        if(!/^image\/(png|jpeg|webp|avif)$/i.test(file.type)&&! /\.(png|jpe?g|webp|avif)$/i.test(file.name))throw new Error("PNG, JPG, WebP, AVIF 이미지를 선택해 주세요.");
+        if(file.size>32*1024*1024)throw new Error("이미지 한 장은 32MB 이하로 첨부해 주세요.");
+        const url=URL.createObjectURL(file);
+        try{
+            const image=await new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=()=>reject(new Error("이 이미지 형식을 브라우저에서 읽을 수 없습니다."));img.src=url;});
+            if(!image.naturalWidth||!image.naturalHeight)throw new Error("이미지 크기를 읽지 못했습니다.");
+            const scale=Math.min(1,4096/image.naturalWidth,4096/image.naturalHeight);
+            if(scale<1){const c=document.createElement("canvas");c.width=Math.max(1,Math.round(image.naturalWidth*scale));c.height=Math.max(1,Math.round(image.naturalHeight*scale));c.getContext("2d").drawImage(image,0,0,c.width,c.height);return {image:c,width:c.width,height:c.height};}
+            return {image,width:image.naturalWidth,height:image.naturalHeight};
+        }finally{URL.revokeObjectURL(url);}
+    }
+
+    async function addImages(files) {
+        if(!canEdit()||!files.length)return;
+        pause();const epoch=projectEpoch;uploading=true;config.onImageLoading?.(true);updateControls();message("이미지를 불러오는 중입니다…");
+        const added=[],failures=[];
+        try{
+            for(const file of files){
+                if(epoch!==projectEpoch||busy)break;
+                try{
+                    const asset=await loadFile(file);
+                    if(epoch!==projectEpoch||busy)break;
+                    const assetId=uid("asset");assets.set(assetId,asset);
+                    const fit=Math.min(700/asset.width,480/asset.height,1);
+                    const l={...baseLayer("image"),assetId,name:file.name,w:Math.max(1,asset.width*fit),h:Math.max(1,asset.height*fit)};
+                    l.x=(W-l.w)/2;l.y=(H-l.h)/2;keepInFrame(l);added.push(l);
+                }catch(e){failures.push(file.name+": "+(e.message||String(e)));}
+            }
+            if(epoch!==projectEpoch||busy)return;
+            if(added.length){pushHistory();layers.push(...added);selectedId=added[added.length-1].id;notifyChange();}
+            message((added.length?added.length+"개 이미지를 추가했습니다. 위치와 크기를 직접 조절하세요.":"이미지를 추가하지 못했습니다.")+(failures.length?" "+failures.join(" / "):""),failures.length>0);
+        }finally{uploading=false;config.onImageLoading?.(false);el("ImageInput").value="";syncProperties();renderList();refresh();}
+    }
+
+    const clipboardType="application/x-longform-image";
+    function isInputTarget(target){
+        return !!(target?.isContentEditable || target?.closest?.("input, textarea, select"));
+    }
+
+    // Preserve geometry for a paste in this project and supply real pixels for other apps.
+    document.addEventListener("copy",e=>{
+        const layer=selected();
+        if(!canEdit()||layer?.type!=="image"||!e.clipboardData) return;
+        if(!root.contains(document.activeElement) && !root.contains(e.target)) return;
+        if(isInputTarget(e.target)||isInputTarget(document.activeElement)||String(window.getSelection())) return;
+        const asset=assets.get(layer.assetId);
+        if(!asset) return;
+        const token=uid("copy")+"-"+Date.now().toString(36);
+        copiedImage={token,layer:{...layer}};
+        e.clipboardData.setData(clipboardType,token);
+        e.preventDefault();
+        message("이미지를 복사했습니다. Ctrl+V 또는 ⌘V로 붙여넣으세요.");
+        if(!navigator.clipboard?.write||typeof ClipboardItem==="undefined") return;
+        const c=document.createElement("canvas");
+        c.width=asset.width;c.height=asset.height;
+        c.getContext("2d").drawImage(asset.image,0,0);
+        const png=new Promise((resolve,reject)=>c.toBlob(blob=>{
+            if(blob) resolve(blob);else reject(new Error("PNG 변환 실패"));
+        },"image/png"));
+        const html=png.then(fileToDataURL).then(src=>new Blob([
+            '<img data-longform-copy="'+token+'" src="'+src+'">'
+        ],{type:"text/html"}));
+        navigator.clipboard.write([new ClipboardItem({"image/png":png,"text/html":html})]).catch(()=>{
+            // The native copy event still carries the project-local reference.
+        });
+    });
+
+    function insertClipboardImage(data){
+        const markup=data.getData("text/html");
+        let tag;
+        if(markup && /<img\b/i.test(markup)){
+            const template=document.createElement("template");
+            template.innerHTML=markup;
+            tag=template.content.querySelector("img");
+        }
+        const token=data.getData(clipboardType)||tag?.getAttribute("data-longform-copy");
+        if(copiedImage && token===copiedImage.token){
+            closeMenu();pause();pushHistory();
+            const source=copiedImage.layer;
+            const {id,start,end}=baseLayer("image");
+            const layer={...source,id,start,end,x:source.x+32,y:source.y+32};
+            keepInFrame(layer);layers.push(layer);selectedId=layer.id;changed();
+            stage.focus({preventScroll:true});message("복사한 이미지를 붙여넣었습니다.");
+            return true;
+        }
+        let files=Array.from(data.files).filter(file=>file.type.startsWith("image/")||/\.(png|jpe?g|webp|avif)$/i.test(file.name));
+        if(!files.length) files=Array.from(data.items||[]).filter(item=>item.kind==="file"&&item.type.startsWith("image/")).map(item=>item.getAsFile()).filter(Boolean);
+        if(!files.length && tag){
+            const src=tag.getAttribute("src")||"";
+            const match=/^data:(image\/(?:png|jpeg|webp|avif));base64,/i.exec(src);
+            if(match){
+                try{
+                    if(src.length-match[0].length>Math.ceil(32*1024*1024/3)*4) throw new Error("이미지 한 장은 32MB 이하로 첨부해 주세요.");
+                    const bytes=base64ToArrayBuffer(src.slice(match[0].length));
+                    files=[new File([bytes],"붙여넣은 이미지."+match[1].split("/")[1],{type:match[1]})];
+                }catch(err){el("PasteHint").textContent="이미지를 읽을 수 없습니다. "+err.message;return true;}
+            }
+        }
+        if(files.length){
+            closeMenu();stage.focus({preventScroll:true});addImages(files);
+            return true;
+        }
+        return false;
+    }
+
+    document.addEventListener("paste",e=>{
+        const data=e.clipboardData;
+        if(!canEdit()||gesture||!data) return;
+        const inEditor=root.contains(e.target)||root.contains(document.activeElement);
+        const field=isInputTarget(e.target)?e.target:isInputTarget(document.activeElement)?document.activeElement:null;
+        if(field && (!root.contains(field)||data.getData("text/plain"))) return;
+        if(!project && !inEditor && e.target!==document.body) return;
+        if(inEditor) el("PasteHint").textContent=defaultPasteHint;
+        if(insertClipboardImage(data)){
+            ++clipboardRequest; // A native paste supersedes any pending permission dialog.
+            e.preventDefault();
+        }else if(inEditor && !field){
+            el("PasteHint").textContent="복사된 사진이 없습니다. 원본 사진에서 ‘이미지 복사’를 선택하거나 캡처한 후 다시 붙여넣으세요.";
+        }
+    });
+
+    el("PasteImage").addEventListener("click",async()=>{
+        if(!canEdit()||gesture) return;
+        const request=++clipboardRequest;
+        stage.focus({preventScroll:true});
+        const hint=el("PasteHint");
+        if(!navigator.clipboard?.read){
+            hint.textContent="미리보기가 선택되었습니다. Ctrl+V를 눌러 붙여넣으세요. Mac에서는 ⌘V를 누르세요.";
+            return;
+        }
+        try{
+            const items=await navigator.clipboard.read();
+            if(request!==clipboardRequest||!canEdit()) return;
+            const data=new DataTransfer();
+            for(const item of items){
+                const type=item.types.find(t=>/^image\/(png|jpeg|webp|avif)$/i.test(t));
+                if(type){
+                    const blob=await item.getType(type);
+                    data.items.add(new File([blob],"붙여넣은 이미지." + type.split("/")[1],{type}));
+                }
+                if(item.types.includes("text/html") && (!type||copiedImage)){
+                    try { data.setData("text/html",await (await item.getType("text/html")).text()); } catch {}
+                }
+            }
+            if(request!==clipboardRequest||!canEdit()||gesture) return;
+            hint.textContent=defaultPasteHint;
+            if(!insertClipboardImage(data)) hint.textContent="복사된 사진이 없습니다. 원본 사진을 복사하거나 화면을 캡처한 뒤 다시 눌러주세요.";
+        }catch{
+            if(request!==clipboardRequest||!canEdit()) return;
+            stage.focus({preventScroll:true});
+            hint.textContent="브라우저가 클립보드를 읽을 수 없습니다. 지금 Ctrl+V를 눌러 붙여넣으세요. Mac에서는 ⌘V를 누르세요.";
+        }
+    });
+
+    async function addText() {
+        if(!canEdit())return;
+        pause();pushHistory();
+        const preferred=config.getDefaultFontId?.();
+        const defaultFont=fonts.some(font=>font.id===preferred)?preferred:(fonts[0]?.id||"system");
+        const l={...baseLayer("text"),text:"텍스트를 입력하세요",fontId:defaultFont,fontSize:76,color:"#ffffff",outline:true,background:false,padding:14};
+        measureTextLayer(l);l.x=(W-l.w)/2;l.y=(H-l.h)/2;layers.push(l);selectedId=l.id;changed();
+        message("텍스트를 추가했습니다. 오른쪽에서 내용을 입력하고 화면에서 위치를 조절하세요.");
+        el("Text").focus();el("Text").select();
+        try{await config.ensureFont(l.fontId,l.text);if(layers.includes(l)&&!busy){measureTextLayer(l);syncProperties();refresh();}}catch(e){message("선택한 글꼴을 불러오지 못해 대체 글꼴로 표시합니다.",true);}
+    }
+
+    function resizeFromHandle(l, original, handle, dx, dy, lockRatio) {
+        const west=handle.includes("w"), north=handle.includes("n");
+        const horizontal=west||handle.includes("e"), vertical=north||handle.includes("s");
+        const anchorX=west?original.x+original.w:original.x;
+        const anchorY=north?original.y+original.h:original.y;
+        const maxW=west?anchorX:W-anchorX, maxH=north?anchorY:H-anchorY;
+        const w=original.w+(west?-dx:dx), h=original.h+(north?-dy:dy);
+        if(l.type==="text" || (lockRatio && horizontal && vertical)){
+            const maxScale=Math.min(maxW/original.w,maxH/original.h);
+            const minScale=Math.min(maxScale,Math.max(1/original.w,1/original.h));
+            const factor=bound((w*original.w+h*original.h)/(original.w**2+original.h**2),minScale,maxScale);
+            if(l.type==="text"){
+                l.fontSize=original.fontSize*factor;measureTextLayer(l,false);
+            }else{
+                l.w=original.w*factor;l.h=original.h*factor;
+            }
+        }else{
+            if(horizontal) l.w=bound(w,1,maxW);
+            if(vertical) l.h=bound(h,1,maxH);
+        }
+        l.x=west?anchorX-l.w:anchorX;
+        l.y=north?anchorY-l.h:anchorY;
+        keepInFrame(l);
+    }
+
+    function removeSelected() {
+        if(!canEdit()||!selected())return;
+        pause();pushHistory();const i=layers.findIndex(l=>l.id===selectedId);
+        if(i<subtitleIndex) subtitleIndex--;
+        layers.splice(i,1);selectedId=layers[Math.min(i,layers.length-1)]?.id||null;changed();message("선택한 요소를 삭제했습니다. 실행 취소로 되돌릴 수 있습니다.");
+    }
+
+    function duplicateSelected() {
+        if(!canEdit()||!selected())return;
+        pause();pushHistory();const source=selected();const copy={...source,id:uid(source.type),lines:source.lines?.slice(),x:source.x+32,y:source.y+32};keepInFrame(copy);
+        const i=layers.indexOf(source);
+        if(i<subtitleIndex) subtitleIndex++;
+        layers.splice(i+1,0,copy);selectedId=copy.id;changed();
+    }
+
+    function stackingOrder(){
+        const order=layers.slice();
+        order.splice(subtitleIndex,0,null);
+        return order;
+    }
+
+    function reorder(direction) {
+        const layer=selected();
+        if(!canEdit()||!layer) return;
+        const order=stackingOrder(), i=order.indexOf(layer);
+        const next=bound(i+direction,0,order.length-1);
+        if(i===next) return;
+        pause();pushHistory();order.splice(i,1);order.splice(next,0,layer);
+        subtitleIndex=order.indexOf(null);order.splice(subtitleIndex,1);layers=order;
+        changed();
+    }
+
+    function closeMenu(restoreFocus=false){
+        if(menu.hidden) return;
+        menu.hidden=true;
+        if(restoreFocus) stage.focus({preventScroll:true});
+    }
+
+    function openOrderMenu(e,layer){
+        if(!canEdit()||!layer) return;
+        e.preventDefault();
+        const rect=e.currentTarget.getBoundingClientRect();
+        pause();selectedId=layer.id;editGroup=null;syncProperties();renderList();refresh();
+        menu.hidden=false;
+        const x=e.clientX||rect.left, y=e.clientY||rect.top;
+        menu.style.left=bound(x,4,window.innerWidth-menu.offsetWidth-4)+"px";
+        menu.style.top=bound(y,4,window.innerHeight-menu.offsetHeight-4)+"px";
+        menu.querySelector("button:enabled")?.focus({preventScroll:true});
+    }
+
+    stage.addEventListener("contextmenu",e=>openOrderMenu(e,
+        e.clientX||e.clientY?hitAt(canvasPoint(e)):selected()));
+    el("ToFront").addEventListener("click",()=>{reorder(Infinity);closeMenu(true);});
+    el("ToBack").addEventListener("click",()=>{reorder(-Infinity);closeMenu(true);});
+    document.addEventListener("pointerdown",e=>{if(!menu.contains(e.target)) closeMenu();});
+    document.addEventListener("focusin",e=>{if(!menu.contains(e.target)) closeMenu();});
+    menu.addEventListener("keydown",e=>{
+        if(e.key==="Escape"){e.preventDefault();e.stopPropagation();closeMenu(true);}
+        if(e.key==="ArrowUp"||e.key==="ArrowDown"){
+            e.preventDefault();e.stopPropagation();
+            const buttons=Array.from(menu.querySelectorAll("button:enabled"));
+            buttons[(buttons.indexOf(document.activeElement)+1)%buttons.length]?.focus();
+        }
+    });
+    window.addEventListener("resize",()=>closeMenu());
+    window.addEventListener("scroll",()=>closeMenu(),true);
+
+    function canvasPoint(e) {const rect=stage.getBoundingClientRect();return{x:(e.clientX-rect.left)*W/rect.width,y:(e.clientY-rect.top)*H/rect.height};}
+    function handleAt(l,p) {
+        const radius=10/displayScale();
+        // Keep a draggable center even when the selected image is very small.
+        if(Math.abs(p.x-l.x-l.w/2)<l.w/4 && Math.abs(p.y-l.y-l.h/2)<l.h/4) return null;
+        let nearest=null, distance=radius;
+        for(const h of handles(l)){
+            const d=Math.hypot(h.x-p.x,h.y-p.y);
+            if(d<=distance){nearest=h;distance=d;}
+        }
+        return nearest;
+    }
+    function hitAt(p) {return layers.slice().reverse().find(l=>at(l,time)&&p.x>=l.x&&p.x<=l.x+l.w&&p.y>=l.y&&p.y<=l.y+l.h)||null;}
+
+    stage.addEventListener("pointerdown",e=>{
+        if(!canEdit()||gesture||e.button!==0)return;
+        pause();const p=canvasPoint(e),prior=selected();
+        const handle=prior&&at(prior,time)?handleAt(prior,p):null;
+        const l=handle?prior:hitAt(p);selectedId=l?l.id:null;
+        stage.focus({preventScroll:true});editGroup=null;
+        if(l){gesture={pointerId:e.pointerId,id:l.id,kind:handle?"resize":"move",handle:handle?.name,start:p,original:{...l},saved:false};stage.setPointerCapture(e.pointerId);e.preventDefault();}
+        syncProperties();renderList();refresh();
+    });
+
+    stage.addEventListener("pointermove",e=>{
+        if(!canEdit())return;
+        const p=canvasPoint(e);
+        if(!gesture){const l=selected(),handle=l&&at(l,time)?handleAt(l,p):null;stage.style.cursor=handle?handle.name+"-resize":hitAt(p)?"move":"default";return;}
+        if(e.pointerId!==gesture.pointerId)return;
+        const l=layers.find(x=>x.id===gesture.id);if(!l)return;
+        if(!gesture.saved){if(Math.hypot(p.x-gesture.start.x,p.y-gesture.start.y)<1)return;pushHistory();gesture.saved=true;}
+        const o=gesture.original;
+        if(gesture.kind==="move"){l.x=bound(o.x+p.x-gesture.start.x,0,W-l.w);l.y=bound(o.y+p.y-gesture.start.y,0,H-l.h);}
+        else resizeFromHandle(l,o,gesture.handle,p.x-gesture.start.x,p.y-gesture.start.y,e.shiftKey);
+        notifyChange();syncProperties();refresh();e.preventDefault();
+    });
+
+    function endGesture(e){if(!gesture||e.pointerId!==gesture.pointerId)return;const saved=gesture.saved;gesture=null;try{stage.releasePointerCapture(e.pointerId);}catch(err){}if(saved){renderList();syncProperties();}refresh();}
+    stage.addEventListener("pointerup",endGesture);stage.addEventListener("pointercancel",endGesture);stage.addEventListener("lostpointercapture",()=>{gesture=null;});
+
+    el("AddImage").addEventListener("click",()=>{if(canEdit())el("ImageInput").click();});
+    el("ImageInput").addEventListener("change",()=>addImages(Array.from(el("ImageInput").files||[])));
+    el("AddText").addEventListener("click",addText);
+    el("Play").addEventListener("click",play);el("Back").addEventListener("click",()=>seek(time-5));
+    el("Seek").addEventListener("input",()=>seek(el("Seek").value));
+    el("Undo").addEventListener("click",()=>restore(history,future));el("Redo").addEventListener("click",()=>restore(future,history));
+    el("Delete").addEventListener("click",removeSelected);el("Duplicate").addEventListener("click",duplicateSelected);
+    el("Forward").addEventListener("click",()=>reorder(1));el("Backward").addEventListener("click",()=>reorder(-1));
+    el("Text").addEventListener("input",()=>{
+        mutate(l=>{l.text=el("Text").value;measureTextLayer(l);},"text-"+selectedId);
+        clearTimeout(textFontTimer);
+        const l=selected();if(!l)return;
+        const content=l.text,font=l.fontId;
+        textFontTimer=setTimeout(async()=>{
+            try{await config.ensureFont(font,content);if(!busy&&layers.includes(l)&&l.text===content&&l.fontId===font){measureTextLayer(l);syncProperties();refresh();}}catch{}
+        },250);
+    });
+    el("FontSize").addEventListener("change",()=>mutate(l=>{l.fontSize=bound(finite(el("FontSize").value,l.fontSize),12,240);measureTextLayer(l);}));
+    el("Color").addEventListener("input",()=>mutate(l=>{l.color=el("Color").value;},"color-"+selectedId));
+    el("Outline").addEventListener("change",()=>mutate(l=>{l.outline=el("Outline").checked;}));
+    el("Background").addEventListener("change",()=>mutate(l=>{l.background=el("Background").checked;}));
+    el("Font").addEventListener("change",async()=>{
+        if(!canEdit()||!selected())return;
+        const l=selected(),fontId=el("Font").value;
+        mutate(layer=>{layer.fontId=fontId;measureTextLayer(layer);});
+        try{await config.ensureFont(fontId,l.text);if(!busy&&layers.includes(l)&&l.fontId===fontId){measureTextLayer(l);syncProperties();refresh();}}
+        catch(e){message("선택한 글꼴을 불러오지 못해 대체 글꼴로 표시합니다.",true);}
+    });
+    for(const [id,key,max] of [["X","x",W],["Y","y",H]])el(id).addEventListener("change",()=>mutate(l=>{l[key]=bound(finite(el(id).value,l[key]),0,max);keepInFrame(l);}));
+    for(const [id,key,max] of [["Width","w",W],["Height","h",H]])el(id).addEventListener("change",()=>mutate(l=>{
+        const value=bound(finite(el(id).valueAsNumber,l[key]),1,max);
+        if(l.type==="image") l[key]=value;
+        else {l.fontSize*=value/l[key];measureTextLayer(l,false);}
+        keepInFrame(l);
+    }));
+    el("Opacity").addEventListener("input",()=>mutate(l=>{l.opacity=bound(finite(el("Opacity").value,100)/100,.05,1);},"opacity-"+selectedId,{list:false}));
+    el("Start").addEventListener("change",()=>mutate(l=>{l.start=bound(finite(el("Start").value,l.start),0,Math.max(0,duration()-.01));if(l.end<=l.start)l.end=Math.min(duration(),l.start+.01);}));
+    el("End").addEventListener("change",()=>mutate(l=>{l.end=bound(finite(el("End").value,l.end),Math.min(duration(),l.start+.01),duration());}));
+    el("Whole").addEventListener("click",()=>mutate(l=>{l.start=0;l.end=duration();}));
+    el("Here").addEventListener("click",()=>mutate(l=>{l.start=bound(time,0,Math.max(0,duration()-.01));l.end=duration();}));
+    el("GoStart").addEventListener("click",()=>{const l=selected();if(l)seek(l.start);});
+    el("Export").addEventListener("click",async()=>{if(!canEdit())return;pause();try{await config.onExport();}catch(e){message("최종 영상 생성 실패: "+(e.message||String(e)),true);}});
+
+    root.addEventListener("keydown",e=>{
+        if(!canEdit()||e.target.isContentEditable||/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName))return;
+        const mod=e.ctrlKey||e.metaKey;
+        if(mod&&e.key.toLowerCase()==="z"){e.preventDefault();restore(e.shiftKey?future:history,e.shiftKey?history:future);return;}
+        if(mod&&e.key.toLowerCase()==="y"){e.preventDefault();restore(future,history);return;}
+        if(e.key==="Escape"){selectedId=null;syncProperties();renderList();refresh();return;}
+        if(!selected())return;
+        if(e.key==="Delete"||e.key==="Backspace"){e.preventDefault();removeSelected();return;}
+        const delta={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[e.key];
+        if(delta){e.preventDefault();const step=e.shiftKey?10:1;mutate(l=>{l.x+=delta[0]*step;l.y+=delta[1]*step;keepInFrame(l);},"arrow-"+selectedId,{list:false});}
+    });
+
+    function setFonts(items) {
+        fonts=items||[];const previous=el("Font").value;el("Font").replaceChildren();
+        for(const font of fonts){const option=document.createElement("option");option.value=font.id;option.textContent=font.label;option.style.fontFamily=font.family;el("Font").appendChild(option);}
+        if(fonts.some(f=>f.id===previous))el("Font").value=previous;
+        const l=selected();if(l&&l.type==="text")el("Font").value=l.fontId;
+    }
+
+    function setProject(next) {
+        closeMenu();pause();projectEpoch++;clipboardRequest++;
+        const firstPreparation=!project && !!next;
+        project=next;
+        if(firstPreparation){
+            // The duration was unknown when these images and undo snapshots were created.
+            for(const batch of [layers,...history.map(s=>s.layers),...future.map(s=>s.layers)]){
+                for(const layer of batch) layer.end=duration();
+            }
+        }else{
+            layers=[];subtitleIndex=0;copiedImage=null;assets.clear();selectedId=null;history=[];future=[];
+        }
+        time=0;dirty=layers.length>0;editGroup=null;gesture=null;
+        el("Seek").max=String(duration());el("Seek").value="0";syncProperties();renderList();refresh();
+        message("음성·자막 준비가 끝났습니다. 재생하며 이미지·텍스트를 편집한 뒤 ‘최종 영상 만들기’를 누르세요. 기본 표시 구간은 현재 위치부터 영상 끝까지입니다.");
+    }
+
+    function setBusy(value,mode="render") {
+        if(value){clipboardRequest++;pause();gesture=null;clearTimeout(textFontTimer);}
+        busy=!!value;busyMode=mode;updateControls();refresh();
+    }
+
+    document.addEventListener("visibilitychange",()=>{if(document.hidden&&playing)pause();});
+    window.addEventListener("pagehide",()=>{pause();if(audioContext&&audioContext.state!=="closed")audioContext.close().catch(()=>{});});
+    if(typeof ResizeObserver!=="undefined")new ResizeObserver(()=>refresh()).observe(stage);
+    setFonts(fonts);syncProperties();refresh();
+
+    return {
+        setProject,refresh,drawOverlays,pause,setBusy,setFonts,seek,
+        remeasureText:()=>{for(const layer of layers)if(layer.type==="text")measureTextLayer(layer);syncProperties();refresh();},
+        setProgress:(percent,current,total)=>{
+            if(!busy)return;
+            el("Export").textContent=`최종 영상 생성 중… ${percent}%`;
+            el("Badge").textContent=`최종 영상 생성 중 ${percent}%`;
+            message(`${stamp(current)} / ${stamp(total)} · 이 탭을 화면에 열어 두세요. 취소하려면 상단의 현재 작업 취소를 누르세요.`);
+        },
+        getUsedFontIds:()=>Array.from(new Set(layers.filter(l=>l.type==="text").map(l=>l.fontId))),
+        setExported:()=>{dirty=false;updateControls();message("최종 영상이 완성되었습니다. 아래 결과 영상에서 확인하고 다운로드하세요.");},
+        getState:()=>({ready:!!project,busy,uploading,playing,dirty,time,duration:duration(),selectedId,layers:cloneLayers(),undoCount:history.length,redoCount:future.length})
+    };
+};
+
+
+// Connect core actions first so editor initialization cannot disconnect them.
+saveButton.addEventListener("click",()=>{saveSettings().catch(error=>setStatus("설정 저장 오류",error.message));});
+applyButton.addEventListener("click",()=>{applyManualSubtitles().then(()=>updateFontSample()).catch(error=>setStatus("자막 검사 오류",error.message));});
+generateButton.addEventListener("click",prepareProject);
+try{
+    overlayEditor=window.createOverlayEditor({
+        drawScene:(target,time)=>drawProjectScene(target,time,activeProject,true),
+        fonts:fontCatalog,
+        getDefaultFontId:()=>selectedSubtitleFontId,
+        ensureFont,
+        resolveFont,
+        startAudioContext,
+        onExport:exportFinalVideo,
+        onImageLoading:loading=>{generateButton.disabled=loading||appBusy;generationCheckButton.disabled=loading||appBusy;},
+        onChange:markResultDirty
+    });
+    writeDiagnostics();
+}catch(error){
+    overlayEditor=null;
+    document.getElementById("ovMessage").textContent="편집 화면을 시작하지 못했습니다. 음성·자막 준비 후 기본 자막으로 최종 영상을 만들 수 있습니다.";
+    setStatus("음성·자막 준비 가능","편집 화면 초기화 오류가 있습니다. 음성·자막 준비 후 별도 최종 영상 만들기 버튼이 표시됩니다.");
+    actionStage="편집기 초기화";writeDiagnostics(error);
+}
+
+ctx.fillStyle="#10151d";
+ctx.fillRect(0,0,1920,1080);
+// Restore a saved background without touching an already generated project.
+if(currentImageData){loadImage(currentImageData).then(image=>{if(!activeProject && !appBusy){buildBackground(image);drawFrame(null);}}).catch(()=>{});}
+document.documentElement.dataset.editorReady="true";
+</script>
+</body>
+</html>
